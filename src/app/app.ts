@@ -34,6 +34,17 @@ interface Advice {
   image: string;
 }
 
+interface DistrictSummary {
+  key: string;
+  district: string;
+  city: string;
+  count: number;
+  avgPrice: number;
+  avgArea: number;
+  topType: string;
+  dominantMode: ListingMode;
+}
+
 @Component({
   selector: 'app-root',
   imports: [CurrencyPipe, FormsModule, LucideAngularModule],
@@ -283,6 +294,46 @@ export class App {
     () => this.sortOptions.find((option) => option.value === this.sortBy())?.label ?? 'Pertinence',
   );
 
+  readonly districtSummaries = computed<DistrictSummary[]>(() => {
+    const groups = new Map<string, PropertyListing[]>();
+
+    for (const listing of this.listings()) {
+      const key = `${listing.city}::${listing.district}`;
+      if (!groups.has(key)) {
+        groups.set(key, []);
+      }
+      groups.get(key)!.push(listing);
+    }
+
+    return [...groups.values()]
+      .map((items) => {
+        const first = items[0];
+        const count = items.length;
+        const avgPrice = Math.round(items.reduce((sum, item) => sum + item.price, 0) / count);
+        const avgArea = Math.round(items.reduce((sum, item) => sum + item.area, 0) / count);
+        const typeCounts = new Map<string, number>();
+        const modeCounts = new Map<ListingMode, number>();
+        for (const item of items) {
+          typeCounts.set(item.type, (typeCounts.get(item.type) ?? 0) + 1);
+          modeCounts.set(item.mode, (modeCounts.get(item.mode) ?? 0) + 1);
+        }
+        const topType = [...typeCounts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+        const dominantMode = [...modeCounts.entries()].sort((a, b) => b[1] - a[1])[0][0];
+
+        return {
+          key: `${first.city}::${first.district}`,
+          district: first.district,
+          city: first.city,
+          count,
+          avgPrice,
+          avgArea,
+          topType,
+          dominantMode,
+        };
+      })
+      .sort((a, b) => b.count - a.count || a.district.localeCompare(b.district));
+  });
+
   get budgetStep(): number {
     return this.selectedMode() === 'buy' ? 50000 : 250;
   }
@@ -324,6 +375,10 @@ export class App {
 
   setMaxArea(value: number): void {
     this.maxArea.set(Math.max(value, this.minArea() + 10));
+  }
+
+  filterByDistrict(summary: DistrictSummary): void {
+    this.query.set(summary.district);
   }
 
   resetAdvancedFilters(): void {

@@ -337,6 +337,59 @@
     </section>
   </section>
 
+  <section class="neighborhoods-section" id="quartiers" aria-labelledby="neighborhoods-title">
+    <div class="neighborhoods-heading">
+      <div>
+        <p class="eyebrow">Explorer par quartier</p>
+        <h2 id="neighborhoods-title">Les quartiers disponibles</h2>
+        <p>Découvrez les annonces regroupées par quartier et comparez les indicateurs clés.</p>
+      </div>
+      <a class="advice-link" href="#annonces">Retour aux annonces</a>
+    </div>
+
+    <div class="neighborhoods-grid">
+      @for (summary of districtSummaries(); track summary.key) {
+        <article class="neighborhood-card">
+          <div class="neighborhood-card-content">
+            <span class="advice-category">{{ summary.city }}</span>
+            <h3>{{ summary.district }}</h3>
+
+            <div class="neighborhood-stats">
+              <div>
+                <span>Annonces</span>
+                <strong>{{ summary.count }}</strong>
+              </div>
+              <div>
+                <span>Prix moyen</span>
+                <strong>
+                  {{
+                    summary.avgPrice
+                      | currency
+                        : (summary.dominantMode === 'buy' ? 'MAD' : 'EUR')
+                        : 'symbol'
+                        : '1.0-0'
+                  }}
+                </strong>
+              </div>
+              <div>
+                <span>Surface moyenne</span>
+                <strong>{{ summary.avgArea }} m2</strong>
+              </div>
+              <div>
+                <span>Type principal</span>
+                <strong>{{ summary.topType }}</strong>
+              </div>
+            </div>
+
+            <button class="neighborhood-button" type="button" (click)="filterByDistrict(summary)">
+              Voir les annonces
+            </button>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+
   <section class="advice-section" id="conseils" aria-labelledby="advice-title">
     <div class="advice-heading">
       <div>
