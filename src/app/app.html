@@ -1,0 +1,366 @@
+<main class="app-shell">
+  <nav class="topbar" aria-label="Navigation principale">
+    <a class="brand" href="#">
+      <span class="brand-mark">H</span>
+      <span>Habita</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#annonces">Annonces</a>
+      <a href="#quartiers">Quartiers</a>
+      <a href="#conseils">Conseils</a>
+    </div>
+
+    <button class="ghost-button" type="button">Publier une annonce</button>
+  </nav>
+
+  <section class="search-section" aria-label="Recherche immobiliere">
+    <div class="search-panel" aria-label="Recherche immobiliere">
+      <div class="search-topline">
+        <div class="mode-switch" role="group" aria-label="Type de transaction">
+          @for (mode of modes; track mode.value) {
+            <button
+              type="button"
+              [class.active]="selectedMode() === mode.value"
+              (click)="changeMode(mode.value)"
+            >
+              {{ mode.label }}
+            </button>
+          }
+        </div>
+
+        <label class="search-field">
+          <span>Ville, quartier ou mot-cle</span>
+          <input
+            type="search"
+            placeholder="Ex: Anfa, terrasse, vue mer..."
+            [ngModel]="query()"
+            (ngModelChange)="query.set($event)"
+          />
+        </label>
+      </div>
+
+      <div class="search-bottomline">
+        <div class="quick-filters">
+          <label>
+            <span>Ville</span>
+            <select [ngModel]="selectedCity()" (ngModelChange)="selectedCity.set($event)">
+              @for (city of cities; track city) {
+                <option [value]="city">{{ city }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Type</span>
+            <select [ngModel]="selectedType()" (ngModelChange)="selectedType.set($event)">
+              <option value="Tous">Tous</option>
+              @for (type of propertyTypes; track type) {
+                <option [value]="type">{{ type }}</option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span>Pieces min.</span>
+            <select [ngModel]="minRooms()" (ngModelChange)="minRooms.set(+$event)">
+              @for (room of [1, 2, 3, 4, 5]; track room) {
+                <option [value]="room">{{ room }}+</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <a class="search-button" href="#annonces">Rechercher</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-grid" id="annonces">
+    <aside class="filters-panel" aria-label="Filtres avances">
+      <details class="more-filters" open>
+        <summary>
+          <span>Plus de criteres</span>
+          <b>+</b>
+        </summary>
+
+        <div class="advanced-grid">
+          <label class="range-field compact-range">
+            <span class="field-label">
+              <i-lucide class="criteria-icon" name="house" aria-hidden="true"></i-lucide>
+              Budget maximum
+            </span>
+            <strong>{{
+              maxBudget()
+                | currency: (selectedMode() === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
+            }}</strong>
+            <input
+              type="range"
+              [min]="budgetMin"
+              [max]="budgetMax"
+              [step]="budgetStep"
+              [ngModel]="maxBudget()"
+              (ngModelChange)="maxBudget.set(+$event)"
+            />
+          </label>
+
+          <div class="filter-group">
+            <span class="field-label">
+              <i-lucide class="criteria-icon" name="building-2" aria-hidden="true"></i-lucide>
+              Types populaires
+            </span>
+            <div class="chip-list">
+              <button
+                type="button"
+                [class.selected]="selectedType() === 'Tous'"
+                (click)="selectedType.set('Tous')"
+              >
+                Tous
+              </button>
+              @for (type of propertyTypes; track type) {
+                <button
+                  type="button"
+                  [class.selected]="selectedType() === type"
+                  (click)="selectedType.set(type)"
+                >
+                  {{ type }}
+                </button>
+              }
+            </div>
+          </div>
+
+          <label>
+            <span class="field-label">
+              <i-lucide class="criteria-icon" name="bed-double" aria-hidden="true"></i-lucide>
+              Chambres min.
+            </span>
+            <select [ngModel]="minBedrooms()" (ngModelChange)="minBedrooms.set(+$event)">
+              @for (bedroom of [0, 1, 2, 3, 4, 5]; track bedroom) {
+                <option [value]="bedroom">
+                  {{ bedroom === 0 ? 'Indifferent' : bedroom + '+' }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label>
+            <span class="field-label">
+              <i-lucide class="criteria-icon" name="bath" aria-hidden="true"></i-lucide>
+              Salles de bain min.
+            </span>
+            <select [ngModel]="minBathrooms()" (ngModelChange)="minBathrooms.set(+$event)">
+              @for (bathroom of [0, 1, 2, 3, 4]; track bathroom) {
+                <option [value]="bathroom">
+                  {{ bathroom === 0 ? 'Indifferent' : bathroom + '+' }}
+                </option>
+              }
+            </select>
+          </label>
+
+          <label class="range-field compact-range area-range">
+            <span class="field-label">
+              <i-lucide class="criteria-icon" name="ruler" aria-hidden="true"></i-lucide>
+              Surface
+            </span>
+            <strong>
+              {{ minArea() }} m2 - {{ maxArea() === 500 ? 'Illimitee' : maxArea() + ' m2' }}
+            </strong>
+            <div class="dual-range">
+              <input
+                type="range"
+                min="0"
+                max="500"
+                step="10"
+                [ngModel]="minArea()"
+                (ngModelChange)="setMinArea(+$event)"
+                aria-label="Surface minimum"
+              />
+              <input
+                type="range"
+                min="0"
+                max="500"
+                step="10"
+                [ngModel]="maxArea()"
+                (ngModelChange)="setMaxArea(+$event)"
+                aria-label="Surface maximum"
+              />
+            </div>
+          </label>
+
+          <label>
+            <span class="field-label">
+              <i-lucide class="criteria-icon" name="arrow-up-down" aria-hidden="true"></i-lucide>
+              Trier par
+            </span>
+            <select [ngModel]="sortBy()" (ngModelChange)="sortBy.set($any($event))">
+              @for (option of sortOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </label>
+        </div>
+
+        <label class="toggle-row">
+          <input
+            type="checkbox"
+            [checked]="newOnly()"
+            (change)="newOnly.set($any($event.target).checked)"
+          />
+          <span>
+            <i-lucide class="criteria-icon" name="sparkles" aria-hidden="true"></i-lucide>
+            Nouvelles annonces uniquement
+          </span>
+        </label>
+
+        <div class="filter-group">
+          <span>Equipements et options</span>
+          <div class="amenity-list">
+            @for (amenity of amenities; track amenity.label) {
+              <button
+                type="button"
+                [class.selected]="selectedAmenities().includes(amenity.label)"
+                (click)="toggleAmenity(amenity.label)"
+              >
+                <i-lucide class="criteria-icon" [name]="amenity.icon" aria-hidden="true"></i-lucide>
+                {{ amenity.label }}
+              </button>
+            }
+          </div>
+        </div>
+
+        <button class="reset-button" type="button" (click)="resetAdvancedFilters()">
+          Reinitialiser les criteres
+        </button>
+      </details>
+    </aside>
+
+    <section class="results-zone">
+      <div class="results-heading">
+        <div>
+          <p class="eyebrow">Resultats</p>
+          <h2>{{ filteredListings().length }} logements disponibles</h2>
+        </div>
+        <div class="sort-control" role="group" aria-label="Trier les annonces">
+          <span>Triés par</span>
+          @for (option of sortOptions; track option.value) {
+            <button
+              class="sort-option"
+              type="button"
+              [class.active]="sortBy() === option.value"
+              [attr.aria-pressed]="sortBy() === option.value"
+              [attr.data-sort]="option.value"
+              (click)="sortBy.set(option.value)"
+            >
+              {{ option.label }}
+            </button>
+          }
+        </div>
+      </div>
+
+      @if (filteredListings().length) {
+        <div class="listing-grid">
+          @for (listing of filteredListings(); track listing.id) {
+            <article class="property-card">
+              <div class="photo-wrap">
+                <img [src]="listing.image" [alt]="listing.title" />
+                <div class="photo-badges">
+                  @if (listing.isNew) {
+                    <span>Nouveau</span>
+                  }
+                  <span>Score {{ listing.score }}</span>
+                </div>
+                <button
+                  class="favorite"
+                  type="button"
+                  [class.saved]="isFavorite(listing.id)"
+                  [attr.aria-label]="
+                    isFavorite(listing.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'
+                  "
+                  (click)="toggleFavorite(listing.id)"
+                >
+                  {{ isFavorite(listing.id) ? 'Favori' : 'Sauver' }}
+                </button>
+              </div>
+
+              <div class="card-body">
+                <div class="price-row">
+                  <strong>
+                    {{
+                      listing.price
+                        | currency: (listing.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
+                    }}
+                  </strong>
+                  <span>{{ listing.mode === 'rent' ? '/ mois' : '' }}</span>
+                </div>
+                <h3>{{ listing.title }}</h3>
+                <p>{{ listing.type }} a {{ listing.city }}, {{ listing.district }}</p>
+
+                <dl class="features">
+                  <div>
+                    <dt>Surface</dt>
+                    <dd>{{ listing.area }} m2</dd>
+                  </div>
+                  <div>
+                    <dt>Pieces</dt>
+                    <dd>{{ listing.rooms }}</dd>
+                  </div>
+                  <div>
+                    <dt>Chambres</dt>
+                    <dd>{{ listing.bedrooms }}</dd>
+                  </div>
+                  <div>
+                    <dt>Sdb</dt>
+                    <dd>{{ listing.bathrooms }}</dd>
+                  </div>
+                </dl>
+
+                <div class="tags">
+                  @for (tag of listing.tags; track tag) {
+                    <span>{{ tag }}</span>
+                  }
+                </div>
+
+                <div class="card-footer">
+                  <span>Maj il y a {{ listing.updatedMinutesAgo }} min</span>
+                  <button type="button">Contacter</button>
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      } @else {
+        <div class="empty-state">
+          <strong>Aucun logement ne correspond a ces filtres.</strong>
+          <p>Elargissez le budget ou choisissez une autre ville pour retrouver des annonces.</p>
+        </div>
+      }
+    </section>
+  </section>
+
+  <section class="advice-section" id="conseils" aria-labelledby="advice-title">
+    <div class="advice-heading">
+      <div>
+        <p class="eyebrow">Guides immobiliers</p>
+        <h2 id="advice-title">Des conseils pour avancer en confiance</h2>
+        <p>
+          Préparez votre projet, comparez vos options et prenez les bonnes décisions à chaque étape.
+        </p>
+      </div>
+      <a class="advice-link" href="#annonces">Explorer les annonces</a>
+    </div>
+
+    <div class="advice-grid">
+      @for (article of advice; track article.title) {
+        <article class="advice-card">
+          <img [src]="article.image" [alt]="article.title" />
+          <div class="advice-card-content">
+            <span class="advice-category">{{ article.category }}</span>
+            <h3>{{ article.title }}</h3>
+            <p>{{ article.description }}</p>
+            <span class="reading-time">{{ article.readingTime }}</span>
+          </div>
+        </article>
+      }
+    </div>
+  </section>
+</main>
