@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { ListingFilters } from '../models/filter';
 import { PropertyListing } from '../models/listing';
 import { LISTING_REPOSITORY, ListingRepository } from '../repositories/listing.repository';
 import { ListingService } from './listing.service';
@@ -40,6 +41,24 @@ describe('ListingService', () => {
       isNew: false,
       updatedMinutesAgo: 8,
       score: 80,
+    },
+    {
+      id: 3,
+      title: 'Studio meuble avec fibre',
+      city: 'Rabat',
+      district: 'Hassan',
+      mode: 'rent',
+      type: 'Studio',
+      price: 7000,
+      area: 45,
+      rooms: 2,
+      bedrooms: 1,
+      bathrooms: 1,
+      image: 'test-3.jpg',
+      tags: ['Meuble', 'Fibre'],
+      isNew: true,
+      updatedMinutesAgo: 1,
+      score: 95,
     },
   ];
   const repository: ListingRepository = {
@@ -84,6 +103,86 @@ describe('ListingService', () => {
     });
 
     expect(result.map((listing) => listing.id)).toEqual([2, 1]);
-    expect(listings.map((listing) => listing.id)).toEqual([1, 2]);
+    expect(listings.map((listing) => listing.id)).toEqual([1, 2, 3]);
+  });
+
+  it('combines city, type, budget, rooms, surface, amenities, mode and novelty filters', () => {
+    const result = service.filter(listings, {
+      mode: 'buy',
+      city: 'Rabat',
+      propertyType: 'Appartement',
+      maxBudget: 1500000,
+      minRooms: 3,
+      minBedrooms: 2,
+      minBathrooms: 1,
+      minArea: 70,
+      maxArea: 90,
+      amenities: ['Balcon'],
+      newOnly: true,
+      sortBy: 'relevance',
+      query: '',
+    });
+
+    expect(result.map((listing) => listing.id)).toEqual([1]);
+  });
+
+  it.each([
+    ['city', { city: 'Casablanca' }],
+    ['property type', { propertyType: 'Maison' }],
+    ['budget', { maxBudget: 1500000 }],
+    ['rooms', { minRooms: 4 }],
+    ['bedrooms', { minBedrooms: 3 }],
+    ['bathrooms', { minBathrooms: 2 }],
+    ['minimum surface', { minArea: 100 }],
+    ['maximum surface', { maxArea: 100 }],
+    ['amenities', { amenities: ['Jardin'] }],
+    ['novelty', { newOnly: true }],
+  ])('applies the %s filter', (_name, update) => {
+    const result = service.filter(listings, {
+      mode: 'buy',
+      city: 'Toutes les villes',
+      propertyType: 'Tous',
+      maxBudget: 3000000,
+      minRooms: 1,
+      minBedrooms: 0,
+      minBathrooms: 0,
+      minArea: 0,
+      maxArea: 500,
+      amenities: [],
+      newOnly: false,
+      sortBy: 'relevance',
+      query: '',
+      ...(update as Partial<ListingFilters>),
+    });
+
+    expect(result).toHaveLength(1);
+  });
+
+  it('filters by mode and performs a trimmed, case-insensitive text search across fields and tags', () => {
+    const baseFilters = {
+      mode: 'rent' as const,
+      city: 'Toutes les villes',
+      propertyType: 'Tous' as const,
+      maxBudget: 10000,
+      minRooms: 1,
+      minBedrooms: 0,
+      minBathrooms: 0,
+      minArea: 0,
+      maxArea: 500,
+      amenities: [],
+      newOnly: false,
+      sortBy: 'relevance' as const,
+    };
+
+    expect(service.filter(listings, { ...baseFilters, query: '' }).map(({ id }) => id)).toEqual([
+      3,
+    ]);
+    expect(
+      service.filter(listings, { ...baseFilters, query: '  HASSAN ' }).map(({ id }) => id),
+    ).toEqual([3]);
+    expect(
+      service.filter(listings, { ...baseFilters, query: 'fibre' }).map(({ id }) => id),
+    ).toEqual([3]);
+    expect(service.filter(listings, { ...baseFilters, query: 'introuvable' })).toEqual([]);
   });
 });
