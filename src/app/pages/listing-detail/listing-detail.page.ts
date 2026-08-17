@@ -67,8 +67,8 @@ import { ListingService } from '../../services/listing.service';
               <div class="detail-actions">
                 <a
                   class="ghost-button"
-                  [href]="'mailto:' + item.contactEmail + '?subject=Annonce : ' + item.title"
-                  [attr.aria-label]="'Contacter l’agence par e-mail pour ' + item.title"
+                  [routerLink]="['/contact', item.id]"
+                  [attr.aria-label]="'Contacter l’agence pour ' + item.title"
                   >Contacter</a
                 >
                 <a

@@ -10,9 +10,16 @@ import { FavoriteService } from '../../services/favorite.service';
     <nav class="topbar" aria-label="Navigation principale">
       <a class="brand" routerLink="/"><span class="brand-mark">H</span><span>Habita</span></a>
       <div class="nav-links">
-        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">Annonces</a><a routerLink="/favoris" routerLinkActive="active">Favoris <span class="favorites-count" aria-label="Nombre de favoris">{{ favoriteCount() }}</span></a><a href="#conseils">Conseils</a>
+        <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
+          >Annonces</a
+        ><a routerLink="/favoris" routerLinkActive="active"
+          >Favoris
+          <span class="favorites-count" aria-label="Nombre de favoris">{{
+            favoriteCount()
+          }}</span></a
+        ><a href="#conseils">Conseils</a>
       </div>
-      <button class="ghost-button" type="button">Publier une annonce</button>
+      <a class="ghost-button" routerLink="/publier">Publier une annonce</a>
     </nav>
   `,
 })
