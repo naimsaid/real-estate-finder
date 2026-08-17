@@ -15,7 +15,16 @@ export const MOCK_LISTINGS: readonly PropertyListing[] = [
     bathrooms: 2,
     image:
       'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
+    ],
     tags: ['Terrasse', 'Parking', 'Ascenseur'],
+    description:
+      'Appartement traversant baigné de lumière, avec une grande terrasse et des finitions soignées. La résidence sécurisée se trouve à proximité immédiate des commerces et des principaux axes.',
+    contactEmail: 'contact@habita.example',
+    contactPhone: '+212522000001',
     isNew: true,
     updatedMinutesAgo: 3,
     score: 98,
@@ -34,7 +43,16 @@ export const MOCK_LISTINGS: readonly PropertyListing[] = [
     bathrooms: 3,
     image:
       'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80',
+    ],
     tags: ['Jardin', 'Suite parentale', 'Calme'],
+    description:
+      'Maison familiale spacieuse au cœur de Hay Riad, offrant un jardin arboré, de beaux volumes et une suite parentale. Les écoles et services sont accessibles en quelques minutes.',
+    contactEmail: 'contact@habita.example',
+    contactPhone: '+212537000002',
     isNew: false,
     updatedMinutesAgo: 12,
     score: 95,
@@ -53,7 +71,16 @@ export const MOCK_LISTINGS: readonly PropertyListing[] = [
     bathrooms: 1,
     image:
       'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1200&q=80',
+    ],
     tags: ['Meuble', 'Metro', 'Fibre'],
+    description:
+      'Studio meublé et optimisé dans une rue vivante de Bastille. Il dispose de nombreux rangements, de la fibre et d’un accès rapide au métro.',
+    contactEmail: 'locations@habita.example',
+    contactPhone: '+33184000003',
     isNew: true,
     updatedMinutesAgo: 1,
     score: 92,
@@ -72,7 +99,16 @@ export const MOCK_LISTINGS: readonly PropertyListing[] = [
     bathrooms: 4,
     image:
       'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1613490493576-7fde63acd811?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1600047509358-9dc75507daeb?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?auto=format&fit=crop&w=1200&q=80',
+    ],
     tags: ['Piscine', 'Gardien', 'Domotique'],
+    description:
+      'Villa contemporaine ouverte sur un jardin paysager et une piscine privée. Elle propose de vastes espaces de réception, cinq chambres et des équipements domotiques.',
+    contactEmail: 'contact@habita.example',
+    contactPhone: '+212524000004',
     isNew: false,
     updatedMinutesAgo: 18,
     score: 90,
@@ -91,7 +127,16 @@ export const MOCK_LISTINGS: readonly PropertyListing[] = [
     bathrooms: 2,
     image:
       'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1600566753190-17f0baa2a6c3?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600607688969-a5bfcd646154?auto=format&fit=crop&w=1200&q=80',
+    ],
     tags: ['Vue mer', 'Neuf', 'Conciergerie'],
+    description:
+      'Loft aux lignes épurées avec vue dégagée sur la marina. La pièce de vie généreuse, les prestations neuves et la conciergerie offrent un cadre privilégié.',
+    contactEmail: 'contact@habita.example',
+    contactPhone: '+212539000005',
     isNew: true,
     updatedMinutesAgo: 6,
     score: 89,
@@ -110,7 +155,16 @@ export const MOCK_LISTINGS: readonly PropertyListing[] = [
     bathrooms: 2,
     image:
       'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=1200&q=80',
+    images: [
+      'https://images.unsplash.com/photo-1600210492493-0946911123ea?auto=format&fit=crop&w=1600&q=80',
+      'https://images.unsplash.com/photo-1600566753051-f0b89df2dd90?auto=format&fit=crop&w=1200&q=80',
+      'https://images.unsplash.com/photo-1600607688960-e095ff83135c?auto=format&fit=crop&w=1200&q=80',
+    ],
     tags: ['Meuble', 'Balcon', 'Plage'],
+    description:
+      'Appartement meublé dans une résidence récente de Founty, doté d’un balcon agréable et situé à quelques minutes de la plage. Disponible immédiatement.',
+    contactEmail: 'locations@habita.example',
+    contactPhone: '+212528000006',
     isNew: false,
     updatedMinutesAgo: 24,
     score: 87,

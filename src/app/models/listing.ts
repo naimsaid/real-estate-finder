@@ -15,7 +15,11 @@ export interface PropertyListing {
   bedrooms: number;
   bathrooms: number;
   image: string;
+  images: string[];
   tags: string[];
+  description: string;
+  contactEmail: string;
+  contactPhone: string;
   isNew: boolean;
   updatedMinutesAgo: number;
   score: number;
