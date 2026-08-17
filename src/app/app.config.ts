@@ -22,11 +22,14 @@ import {
 } from 'lucide-angular';
 
 import { routes } from './app.routes';
+import { LISTING_REPOSITORY } from './repositories/listing.repository';
+import { StaticListingRepository } from './repositories/static-listing.repository';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideRouter(routes),
+    { provide: LISTING_REPOSITORY, useExisting: StaticListingRepository },
     importProvidersFrom(
       LucideAngularModule.pick({
         ArrowUpDown,
