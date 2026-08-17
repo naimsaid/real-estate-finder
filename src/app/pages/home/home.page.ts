@@ -18,7 +18,7 @@ import { ListingService } from '../../services/listing.service';
     <main class="app-shell">
       <app-header />
       <app-search-panel [modes]="modes" [cities]="cities" [propertyTypes]="propertyTypes" [selectedMode]="filters().mode" [selectedCity]="filters().city" [selectedType]="filters().propertyType" [minRooms]="filters().minRooms" [query]="filters().query" (modeChange)="changeMode($event)" (cityChange)="updateFilters({ city: $event })" (typeChange)="updateFilters({ propertyType: $event })" (roomsChange)="updateFilters({ minRooms: $event })" (queryChange)="updateFilters({ query: $event })" />
-      <section class="content-grid" id="annonces"><app-filters-panel [filters]="filters()" [propertyTypes]="propertyTypes" [amenities]="amenities" [sortOptions]="sortOptions" (filtersChange)="updateFilters($event)" (resetFilters)="resetAdvancedFilters()" /><app-listing-grid [listings]="filteredListings()" [sortOptions]="sortOptions" [sortBy]="filters().sortBy" [favoriteIds]="favorites.favorites()" (sortChange)="updateFilters({ sortBy: $event })" (favoriteToggle)="favorites.toggle($event)" /></section>
+      <section class="content-grid" id="annonces"><app-filters-panel [filters]="filters()" [propertyTypes]="propertyTypes" [amenities]="amenities" [sortOptions]="sortOptions" (filtersChange)="updateFilters($event)" (resetFilters)="resetAdvancedFilters()" /><app-listing-grid [listings]="filteredListings()" [sortOptions]="sortOptions" [sortBy]="filters().sortBy" [favoriteIds]="favorites.favorites()" (sortChange)="updateFilters({ sortBy: $event })" (favoriteToggle)="favorites.toggleFavorite($event)" /></section>
       <app-advice-section [advice]="advice" />
     </main>
   `,

@@ -21,7 +21,7 @@ import { ListingService } from '../../services/listing.service';
           [sortBy]="sortBy()"
           [favoriteIds]="favorites.favorites()"
           (sortChange)="sortBy.set($event)"
-          (favoriteToggle)="favorites.toggle($event)"
+          (favoriteToggle)="favorites.toggleFavorite($event)"
         />
       </section>
     </main>

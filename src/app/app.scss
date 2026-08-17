@@ -73,6 +73,19 @@
   }
 }
 
+.favorites-count {
+  background: var(--coral);
+  border-radius: 999px;
+  color: #ffffff;
+  display: inline-block;
+  font-size: 0.72rem;
+  line-height: 1;
+  margin-left: 4px;
+  min-width: 20px;
+  padding: 4px 6px;
+  text-align: center;
+}
+
 .listing-link {
   color: inherit;
   text-decoration: none;
