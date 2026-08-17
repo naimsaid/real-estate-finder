@@ -1,5 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { appConfig } from '../../app.config';
+import { MOCK_LISTINGS } from '../../data/mock-listings';
+import { LISTING_REPOSITORY } from '../../repositories/listing.repository';
+import { ListingService } from '../../services/listing.service';
 import { HomePage } from './home.page';
 
 describe('HomePage', () => {
@@ -71,5 +74,44 @@ describe('HomePage', () => {
       newOnly: false,
       sortBy: 'relevance',
     });
+  });
+
+  it('paginates client-side by 12 and resets the page when filters change', () => {
+    const listings = Array.from({ length: 25 }, (_, index) => ({
+      ...MOCK_LISTINGS[0],
+      id: index + 1,
+      score: 100 - index,
+    }));
+    TestBed.overrideProvider(LISTING_REPOSITORY, {
+      useValue: {
+        getListings: () => listings,
+        getListingById: (id: number) => listings.find((listing) => listing.id === id),
+      },
+    });
+    const page = TestBed.createComponent(HomePage).componentInstance;
+
+    expect(page.paginatedListings()).toHaveLength(12);
+    expect(page.totalPages()).toBe(3);
+
+    page.changePage(3);
+    expect(page.paginatedListings()).toHaveLength(1);
+
+    page.updateFilters({ sortBy: 'priceAsc' });
+    expect(page.currentPage()).toBe(1);
+  });
+
+  it('does not repeat criterion filtering when only sort or page changes', () => {
+    const page = TestBed.createComponent(HomePage).componentInstance;
+    const filterSpy = vi.spyOn(TestBed.inject(ListingService), 'filterMatches');
+
+    page.paginatedListings();
+    expect(filterSpy).toHaveBeenCalledTimes(1);
+
+    page.updateFilters({ sortBy: 'priceDesc' });
+    page.paginatedListings();
+    page.changePage(1);
+    page.paginatedListings();
+
+    expect(filterSpy).toHaveBeenCalledTimes(1);
   });
 });

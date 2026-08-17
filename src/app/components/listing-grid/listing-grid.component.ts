@@ -12,7 +12,9 @@ import { ListingCardComponent } from '../listing-card/listing-card.component';
       <div class="results-heading">
         <div>
           <p class="eyebrow">Resultats</p>
-          <h2 aria-live="polite" aria-atomic="true">{{ listings.length }} logements disponibles</h2>
+          <h2 aria-live="polite" aria-atomic="true">
+            {{ totalListings ?? listings.length }} logements disponibles
+          </h2>
         </div>
         <div class="sort-control" role="group" aria-label="Trier les annonces">
           <span>Triés par</span>
@@ -58,6 +60,25 @@ import { ListingCardComponent } from '../listing-card/listing-card.component';
             />
           }
         </div>
+        @if (totalPages > 1) {
+          <nav class="pagination" aria-label="Pagination des annonces">
+            <button
+              type="button"
+              [disabled]="currentPage === 1"
+              (click)="pageChange.emit(currentPage - 1)"
+            >
+              Précédent
+            </button>
+            <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+            <button
+              type="button"
+              [disabled]="currentPage === totalPages"
+              (click)="pageChange.emit(currentPage + 1)"
+            >
+              Suivant
+            </button>
+          </nav>
+        }
       } @else {
         <div class="empty-state">
           <strong>Aucun logement ne correspond a ces filtres.</strong>
@@ -69,6 +90,9 @@ import { ListingCardComponent } from '../listing-card/listing-card.component';
 })
 export class ListingGridComponent {
   @Input({ required: true }) listings!: PropertyListing[];
+  @Input() totalListings?: number;
+  @Input() currentPage = 1;
+  @Input() totalPages = 1;
   @Input() loading = false;
   @Input() error: string | null = null;
   @Input({ required: true }) sortOptions!: SelectOption<SortOption>[];
@@ -76,5 +100,6 @@ export class ListingGridComponent {
   @Input() favoriteIds: number[] = [];
   @Output() readonly sortChange = new EventEmitter<SortOption>();
   @Output() readonly favoriteToggle = new EventEmitter<number>();
+  @Output() readonly pageChange = new EventEmitter<number>();
   readonly skeletonItems = [1, 2, 3, 4];
 }

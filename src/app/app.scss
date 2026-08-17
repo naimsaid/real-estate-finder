@@ -807,6 +807,34 @@ select:focus {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 28px;
+
+  button {
+    background: #ffffff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--accent);
+    font-weight: 900;
+    padding: 10px 14px;
+
+    &:disabled {
+      color: var(--muted);
+      cursor: not-allowed;
+      opacity: 0.55;
+    }
+  }
+
+  span {
+    color: var(--muted);
+    font-weight: 800;
+  }
+}
+
 .skeleton-card {
   pointer-events: none;
 }
