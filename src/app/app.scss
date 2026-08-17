@@ -217,7 +217,8 @@
 
 button,
 input,
-select {
+select,
+textarea {
   font: inherit;
 }
 
@@ -232,6 +233,74 @@ summary:focus-visible,
 a:focus-visible {
   outline: 3px solid var(--accent-strong);
   outline-offset: 3px;
+}
+
+.form-page {
+  display: grid;
+  gap: 28px;
+  max-width: 860px;
+}
+
+.form-intro {
+  color: var(--muted);
+  line-height: 1.6;
+}
+
+.form-eyebrow {
+  margin-top: 28px;
+}
+
+.habita-form,
+.form-success {
+  background: var(--card);
+  border: 1px solid rgba(25, 58, 95, 0.08);
+  border-radius: 8px;
+  box-shadow: 0 24px 70px rgba(23, 32, 51, 0.08);
+  padding: clamp(24px, 4vw, 42px);
+}
+
+.habita-form {
+  display: grid;
+  gap: 22px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+
+  input,
+  select,
+  textarea {
+    background: #f8fbff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--ink);
+    min-height: 48px;
+    padding: 12px 14px;
+  }
+
+  textarea {
+    resize: vertical;
+  }
+}
+
+.form-wide,
+.form-submit {
+  grid-column: 1 / -1;
+}
+
+.form-submit {
+  justify-self: start;
+}
+
+.field-error {
+  color: #b42318;
+  font-weight: 700;
+}
+
+.form-success {
+  border-left: 5px solid var(--accent);
+
+  p {
+    color: var(--muted);
+    margin: 8px 0 0;
+  }
 }
 
 .ghost-button,
@@ -1146,7 +1215,8 @@ select:focus {
   .search-topline,
   .search-bottomline,
   .quick-filters,
-  .listing-grid {
+  .listing-grid,
+  .habita-form {
     grid-template-columns: 1fr;
   }
 
