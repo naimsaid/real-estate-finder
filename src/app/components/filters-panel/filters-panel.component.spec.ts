@@ -66,4 +66,22 @@ describe('FiltersPanelComponent', () => {
       1000, 25000, 250,
     ]);
   });
+
+  it('handles the new-only checkbox without template casts', () => {
+    const emitted: Partial<ListingFilters>[] = [];
+    component.filtersChange.subscribe((value) => emitted.push(value));
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.checked = true;
+
+    component.onNewOnlyChange(new Event('change', { bubbles: true }));
+    component.onNewOnlyChange({ target: checkbox } as unknown as Event);
+
+    expect(emitted).toEqual([{ newOnly: true }]);
+  });
+
+  it('exposes surface bounds as track percentages', () => {
+    expect(component.minAreaPercent).toBe(20);
+    expect(component.maxAreaPercent).toBe(40);
+  });
 });

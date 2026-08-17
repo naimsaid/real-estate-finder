@@ -225,6 +225,15 @@ button {
   cursor: pointer;
 }
 
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--accent-strong);
+  outline-offset: 3px;
+}
+
 .ghost-button,
 .card-footer button,
 .search-button {
@@ -458,7 +467,12 @@ select:focus {
   position: relative;
 
   &::before {
-    background: #dbe7ff;
+    background: linear-gradient(
+      to right,
+      #dbe7ff 0 var(--range-start),
+      var(--accent-strong) var(--range-start) var(--range-end),
+      #dbe7ff var(--range-end) 100%
+    );
     border-radius: 999px;
     content: '';
     height: 6px;
@@ -469,6 +483,7 @@ select:focus {
   }
 
   input {
+    appearance: none;
     accent-color: var(--accent);
     background: transparent;
     grid-area: 1 / 1;
@@ -478,12 +493,38 @@ select:focus {
     width: 100%;
   }
 
+  input::-webkit-slider-runnable-track {
+    background: transparent;
+    height: 6px;
+  }
+
+  input::-moz-range-track {
+    background: transparent;
+    height: 6px;
+  }
+
+  input:focus-visible {
+    border-radius: 999px;
+  }
+
   input::-webkit-slider-thumb {
+    appearance: none;
+    background: #ffffff;
+    border: 3px solid var(--accent-strong);
+    border-radius: 50%;
+    height: 22px;
+    margin-top: -8px;
     pointer-events: auto;
+    width: 22px;
   }
 
   input::-moz-range-thumb {
+    background: #ffffff;
+    border: 3px solid var(--accent-strong);
+    border-radius: 50%;
+    height: 16px;
     pointer-events: auto;
+    width: 16px;
   }
 }
 
@@ -1116,6 +1157,11 @@ select:focus {
     gap: 12px;
   }
 
+  .sort-control {
+    border-radius: 12px;
+    width: 100%;
+  }
+
   .advice-section {
     padding-top: 56px;
   }
@@ -1130,5 +1176,23 @@ select:focus {
 
   .detail-copy {
     padding: 24px 18px;
+  }
+}
+
+@media (max-width: 360px) {
+  .content-grid,
+  .search-section,
+  .page-content {
+    margin-inline: 0;
+    padding-inline: 12px;
+  }
+
+  .filters-panel,
+  .search-panel {
+    padding: 14px;
+  }
+
+  .sort-option {
+    flex: 1 1 auto;
   }
 }
