@@ -12,7 +12,7 @@ import { ListingCardComponent } from '../listing-card/listing-card.component';
       <div class="results-heading">
         <div>
           <p class="eyebrow">Resultats</p>
-          <h2>{{ listings.length }} logements disponibles</h2>
+          <h2 aria-live="polite" aria-atomic="true">{{ listings.length }} logements disponibles</h2>
         </div>
         <div class="sort-control" role="group" aria-label="Trier les annonces">
           <span>Triés par</span>
