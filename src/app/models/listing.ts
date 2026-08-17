@@ -1,0 +1,22 @@
+export type ListingMode = 'buy' | 'rent';
+
+export type PropertyType = 'Appartement' | 'Maison' | 'Villa' | 'Studio' | 'Loft';
+
+export interface PropertyListing {
+  id: number;
+  title: string;
+  city: string;
+  district: string;
+  mode: ListingMode;
+  type: PropertyType;
+  price: number;
+  area: number;
+  rooms: number;
+  bedrooms: number;
+  bathrooms: number;
+  image: string;
+  tags: string[];
+  isNew: boolean;
+  updatedMinutesAgo: number;
+  score: number;
+}
