@@ -24,7 +24,7 @@ import { ListingService } from '../../services/listing.service';
               <strong class="detail-price">{{ item.price | currency: (item.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0' }}{{ item.mode === 'rent' ? ' / mois' : '' }}</strong>
               <dl class="features detail-features"><div><dt>Surface</dt><dd>{{ item.area }} m2</dd></div><div><dt>Pièces</dt><dd>{{ item.rooms }}</dd></div><div><dt>Chambres</dt><dd>{{ item.bedrooms }}</dd></div><div><dt>Sdb</dt><dd>{{ item.bathrooms }}</dd></div></dl>
               <div class="tags">@for (tag of item.tags; track tag) { <span>{{ tag }}</span> }</div>
-              <button class="ghost-button" type="button" (click)="favorites.toggle(item.id)">{{ favorites.isFavorite(item.id) ? 'Retirer des favoris' : 'Ajouter aux favoris' }}</button>
+              <button class="ghost-button" type="button" (click)="favorites.toggleFavorite(item.id)">{{ favorites.isFavorite(item.id) ? 'Retirer des favoris' : 'Ajouter aux favoris' }}</button>
             </div>
           </article>
         } @else {
