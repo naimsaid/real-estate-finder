@@ -10,6 +10,8 @@ import { AdviceService } from '../../services/advice.service';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
 
+const PAGE_SIZE = 12;
+
 @Component({
   selector: 'app-home-page',
   imports: [
@@ -47,13 +49,17 @@ import { ListingService } from '../../services/listing.service';
           (filtersChange)="updateFilters($event)"
           (resetFilters)="resetAdvancedFilters()"
         /><app-listing-grid
-          [listings]="filteredListings()"
+          [listings]="paginatedListings()"
+          [totalListings]="sortedListings().length"
+          [currentPage]="currentPage()"
+          [totalPages]="totalPages()"
           [loading]="listings.isLoading()"
           [error]="listings.error()"
           [sortOptions]="sortOptions"
           [sortBy]="filters().sortBy"
           [favoriteIds]="favorites.favorites()"
           (sortChange)="updateFilters({ sortBy: $event })"
+          (pageChange)="changePage($event)"
           (favoriteToggle)="favorites.toggleFavorite($event)"
         />
       </section>
@@ -113,12 +119,36 @@ export class HomePage {
     sortBy: 'relevance',
     query: '',
   });
-  readonly filteredListings = computed(() =>
-    this.listings.filter(this.listings.listings(), this.filters()),
+  readonly currentPage = signal(1);
+  private readonly criteria = computed(
+    () => {
+      const { sortBy, ...criteria } = this.filters();
+      void sortBy;
+      return criteria;
+    },
+    { equal: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
   );
+  private readonly matchingListings = computed(() =>
+    this.listings.filterMatches(this.listings.listings(), this.criteria()),
+  );
+  readonly filteredListings = computed(() =>
+    this.listings.sort(this.matchingListings(), this.filters().sortBy),
+  );
+  readonly sortedListings = this.filteredListings;
+  readonly totalPages = computed(() =>
+    Math.max(1, Math.ceil(this.sortedListings().length / PAGE_SIZE)),
+  );
+  readonly paginatedListings = computed(() => {
+    const start = (this.currentPage() - 1) * PAGE_SIZE;
+    return this.sortedListings().slice(start, start + PAGE_SIZE);
+  });
 
   updateFilters(update: Partial<ListingFilters>): void {
     this.filters.update((filters) => ({ ...filters, ...update }));
+    this.currentPage.set(1);
+  }
+  changePage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
   }
   changeMode(mode: ListingMode): void {
     this.updateFilters({ mode, maxBudget: mode === 'buy' ? 4000000 : 12000 });

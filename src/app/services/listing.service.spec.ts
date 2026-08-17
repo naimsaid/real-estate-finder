@@ -185,4 +185,31 @@ describe('ListingService', () => {
     ).toEqual([3]);
     expect(service.filter(listings, { ...baseFilters, query: 'introuvable' })).toEqual([]);
   });
+
+  it('filters 10,000 listings within a basic performance budget', () => {
+    const largeDataset = Array.from({ length: 10_000 }, (_, index) => ({
+      ...listings[index % listings.length],
+      id: index + 1,
+    }));
+    const startedAt = performance.now();
+
+    const result = service.filter(largeDataset, {
+      mode: 'buy',
+      city: 'Toutes les villes',
+      propertyType: 'Tous',
+      maxBudget: 3000000,
+      minRooms: 1,
+      minBedrooms: 0,
+      minBathrooms: 0,
+      minArea: 0,
+      maxArea: 500,
+      amenities: [],
+      newOnly: false,
+      sortBy: 'relevance',
+      query: 'test',
+    });
+
+    expect(result).toHaveLength(6667);
+    expect(performance.now() - startedAt).toBeLessThan(1000);
+  });
 });
