@@ -11,15 +11,65 @@ import { PropertyListing } from '../../models/listing';
     <article class="property-card">
       <div class="photo-wrap">
         <img [src]="listing.image" [alt]="listing.title" />
-        <div class="photo-badges">@if (listing.isNew) { <span>Nouveau</span> }<span>Score {{ listing.score }}</span></div>
-        <button class="favorite" type="button" [class.saved]="favorite" [attr.aria-label]="favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'" (click)="favoriteToggle.emit(listing.id)">{{ favorite ? 'Favori' : 'Sauver' }}</button>
+        <div class="photo-badges">
+          @if (listing.isNew) {
+            <span>Nouveau</span>
+          }
+          <span>Score {{ listing.score }}</span>
+        </div>
+        <button
+          class="favorite"
+          type="button"
+          [class.saved]="favorite"
+          [attr.aria-label]="favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'"
+          (click)="favoriteToggle.emit(listing.id)"
+        >
+          {{ favorite ? 'Favori' : 'Sauver' }}
+        </button>
       </div>
       <div class="card-body">
-        <div class="price-row"><strong>{{ listing.price | currency: (listing.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0' }}</strong><span>{{ listing.mode === 'rent' ? '/ mois' : '' }}</span></div>
-        <h3><a class="listing-link" [routerLink]="['/annonces', listing.id]">{{ listing.title }}</a></h3><p>{{ listing.type }} a {{ listing.city }}, {{ listing.district }}</p>
-        <dl class="features"><div><dt>Surface</dt><dd>{{ listing.area }} m2</dd></div><div><dt>Pieces</dt><dd>{{ listing.rooms }}</dd></div><div><dt>Chambres</dt><dd>{{ listing.bedrooms }}</dd></div><div><dt>Sdb</dt><dd>{{ listing.bathrooms }}</dd></div></dl>
-        <div class="tags">@for (tag of listing.tags; track tag) { <span>{{ tag }}</span> }</div>
-        <div class="card-footer"><span>Maj il y a {{ listing.updatedMinutesAgo }} min</span><a class="detail-link" [routerLink]="['/annonces', listing.id]">Voir l’annonce</a></div>
+        <div class="price-row">
+          <strong>{{
+            listing.price | currency: (listing.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
+          }}</strong
+          ><span>{{ listing.mode === 'rent' ? '/ mois' : '' }}</span>
+        </div>
+        <h3>
+          <a
+            class="listing-link card-link"
+            [routerLink]="['/annonces', listing.id]"
+            [attr.aria-label]="'Voir le détail de ' + listing.title"
+            >{{ listing.title }}</a
+          >
+        </h3>
+        <p>{{ listing.type }} a {{ listing.city }}, {{ listing.district }}</p>
+        <dl class="features">
+          <div>
+            <dt>Surface</dt>
+            <dd>{{ listing.area }} m2</dd>
+          </div>
+          <div>
+            <dt>Pieces</dt>
+            <dd>{{ listing.rooms }}</dd>
+          </div>
+          <div>
+            <dt>Chambres</dt>
+            <dd>{{ listing.bedrooms }}</dd>
+          </div>
+          <div>
+            <dt>Sdb</dt>
+            <dd>{{ listing.bathrooms }}</dd>
+          </div>
+        </dl>
+        <div class="tags">
+          @for (tag of listing.tags; track tag) {
+            <span>{{ tag }}</span>
+          }
+        </div>
+        <div class="card-footer">
+          <span>Maj il y a {{ listing.updatedMinutesAgo }} min</span
+          ><a class="detail-link" [routerLink]="['/annonces', listing.id]">Voir l’annonce</a>
+        </div>
       </div>
     </article>
   `,
