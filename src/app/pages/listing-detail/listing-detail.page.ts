@@ -18,7 +18,11 @@ import { ListingService } from '../../services/listing.service';
           <article class="listing-detail">
             <section class="detail-gallery" aria-label="Galerie photos de l’annonce">
               @for (image of item.images; track image; let index = $index) {
-                <img [src]="image" [alt]="item.title + ' — photo ' + (index + 1)" />
+                <img
+                  [src]="image"
+                  [alt]="'Photo ' + (index + 1) + ' du bien « ' + item.title + ' » à ' + item.city"
+                  (error)="useFallbackImage($event)"
+                />
               }
             </section>
             <div class="detail-copy">
@@ -102,8 +106,14 @@ import { ListingService } from '../../services/listing.service';
   `,
 })
 export class ListingDetailPage {
+  private readonly fallbackImage = '/assets/fallback-property.jpg';
   private readonly route = inject(ActivatedRoute);
   private readonly listings = inject(ListingService);
   readonly favorites = inject(FavoriteService);
   readonly listing = this.listings.getListingById(Number(this.route.snapshot.paramMap.get('id')));
+
+  useFallbackImage(event: Event): void {
+    const image = event.target as HTMLImageElement;
+    if (!image.src.endsWith(this.fallbackImage)) image.src = this.fallbackImage;
+  }
 }
