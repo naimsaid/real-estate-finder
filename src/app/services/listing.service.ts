@@ -1,4 +1,4 @@
-import { computed, inject, Injectable } from '@angular/core';
+import { inject, Injectable, signal } from '@angular/core';
 import { ListingFilters } from '../models/filter';
 import { PropertyListing } from '../models/listing';
 import { LISTING_REPOSITORY } from '../repositories/listing.repository';
@@ -6,8 +6,21 @@ import { LISTING_REPOSITORY } from '../repositories/listing.repository';
 @Injectable({ providedIn: 'root' })
 export class ListingService {
   private readonly repository = inject(LISTING_REPOSITORY);
+  private readonly listingState = signal<readonly PropertyListing[]>([]);
 
-  readonly listings = computed(() => this.repository.getListings());
+  readonly listings = this.listingState.asReadonly();
+  readonly isLoading = signal(true);
+  readonly error = signal<string | null>(null);
+
+  constructor() {
+    try {
+      this.listingState.set(this.repository.getListings());
+    } catch {
+      this.error.set('Impossible de charger les annonces. Veuillez réessayer plus tard.');
+    } finally {
+      queueMicrotask(() => this.isLoading.set(false));
+    }
+  }
 
   getListingById(id: number): PropertyListing | undefined {
     return this.repository.getListingById(id);

@@ -10,7 +10,11 @@ import { PropertyListing } from '../../models/listing';
   template: `
     <article class="property-card">
       <div class="photo-wrap">
-        <img [src]="listing.image" [alt]="listing.title" />
+        <img
+          [src]="listing.image"
+          [alt]="'Photo du bien « ' + listing.title + ' » à ' + listing.city"
+          (error)="useFallbackImage($event)"
+        />
         <div class="photo-badges">
           @if (listing.isNew) {
             <span>Nouveau</span>
@@ -75,7 +79,13 @@ import { PropertyListing } from '../../models/listing';
   `,
 })
 export class ListingCardComponent {
+  private readonly fallbackImage = '/assets/fallback-property.jpg';
   @Input({ required: true }) listing!: PropertyListing;
   @Input() favorite = false;
   @Output() readonly favoriteToggle = new EventEmitter<number>();
+
+  useFallbackImage(event: Event): void {
+    const image = event.target as HTMLImageElement;
+    if (!image.src.endsWith(this.fallbackImage)) image.src = this.fallbackImage;
+  }
 }
