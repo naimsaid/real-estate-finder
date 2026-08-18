@@ -551,6 +551,12 @@ select:focus {
   margin-inline: clamp(18px, 4vw, 64px);
 }
 
+.mobile-filters-trigger,
+.filters-backdrop,
+.filters-drawer-heading {
+  display: none;
+}
+
 .content-grid {
   align-items: start;
   display: grid;
@@ -1188,8 +1194,78 @@ select:focus {
     grid-template-columns: 1fr;
   }
 
-  .filters-panel {
-    position: static;
+  .mobile-filters-trigger {
+    align-items: center;
+    background: var(--accent);
+    border: 0;
+    border-radius: 8px;
+    color: #ffffff;
+    display: inline-flex;
+    font-weight: 900;
+    justify-content: center;
+    min-height: 48px;
+    width: 100%;
+  }
+
+  .filters-backdrop {
+    background: rgba(10, 22, 38, 0.58);
+    border: 0;
+    display: block;
+    inset: 0;
+    position: fixed;
+    z-index: 99;
+  }
+
+  .filters-drawer {
+    background: var(--card);
+    border-radius: 18px 18px 0 0;
+    bottom: 0;
+    box-shadow: 0 -16px 50px rgba(10, 22, 38, 0.22);
+    left: 0;
+    max-height: min(88vh, 760px);
+    overflow-y: auto;
+    position: fixed;
+    right: 0;
+    transform: translateY(105%);
+    transition: transform 180ms ease-out;
+    z-index: 100;
+
+    &.open {
+      transform: translateY(0);
+    }
+
+    .filters-panel {
+      border: 0;
+      border-radius: 0;
+      box-shadow: none;
+      padding-top: 8px;
+      position: static;
+    }
+  }
+
+  .filters-drawer-heading {
+    align-items: center;
+    border-bottom: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    padding: 16px 22px;
+    position: sticky;
+    top: 0;
+    background: var(--card);
+    z-index: 1;
+
+    h2 {
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    button {
+      background: transparent;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      min-height: 44px;
+      padding-inline: 14px;
+    }
   }
 }
 

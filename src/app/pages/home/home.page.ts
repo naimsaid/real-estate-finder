@@ -2,6 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  ElementRef,
+  HostListener,
+  ViewChild,
   computed,
   inject,
   signal,
@@ -75,14 +78,49 @@ const DEFAULT_FILTERS: Filter = {
         (queryChange)="updateFilters({ query: $event })"
       />
       <section class="content-grid" id="annonces">
-        <app-filters-panel
-          [filters]="filters()"
-          [propertyTypes]="propertyTypes"
-          [amenities]="amenities"
-          [sortOptions]="sortOptions"
-          (filtersChange)="updateFilters($event)"
-          (resetFilters)="resetAdvancedFilters()"
-        />
+        <button
+          #filtersTrigger
+          class="mobile-filters-trigger"
+          type="button"
+          aria-controls="mobile-filters"
+          [attr.aria-expanded]="filtersOpen()"
+          (click)="openFilters()"
+        >
+          Afficher les filtres
+        </button>
+        @if (filtersOpen()) {
+          <button
+            class="filters-backdrop"
+            type="button"
+            aria-label="Fermer les filtres"
+            (click)="closeFilters()"
+          ></button>
+        }
+        <div
+          #filtersDrawer
+          id="mobile-filters"
+          class="filters-drawer"
+          [class.open]="filtersOpen()"
+          [attr.role]="isMobile() ? 'dialog' : null"
+          [attr.aria-modal]="isMobile() ? 'true' : null"
+          [attr.aria-labelledby]="isMobile() ? 'filters-drawer-title' : null"
+          [attr.inert]="isMobile() && !filtersOpen() ? '' : null"
+        >
+          <div class="filters-drawer-heading">
+            <h2 id="filters-drawer-title">Filtres</h2>
+            <button type="button" aria-label="Fermer les filtres" (click)="closeFilters()">
+              Fermer
+            </button>
+          </div>
+          <app-filters-panel
+            [filters]="filters()"
+            [propertyTypes]="propertyTypes"
+            [amenities]="amenities"
+            [sortOptions]="sortOptions"
+            (filtersChange)="updateFilters($event)"
+            (resetFilters)="resetAdvancedFilters()"
+          />
+        </div>
         <div class="results-column">
           <div class="view-toggle" role="group" aria-label="Mode d’affichage">
             <button
@@ -140,6 +178,8 @@ const DEFAULT_FILTERS: Filter = {
   `,
 })
 export class HomePage {
+  @ViewChild('filtersDrawer') private filtersDrawer?: ElementRef<HTMLElement>;
+  @ViewChild('filtersTrigger') private filtersTrigger?: ElementRef<HTMLButtonElement>;
   readonly listings = inject(ListingService);
   readonly favorites = inject(FavoriteService);
   readonly savedSearches = inject(SavedSearchService);
@@ -183,6 +223,8 @@ export class HomePage {
   readonly filters = signal<Filter>(this.filtersFromParams(this.route.snapshot.queryParamMap));
   readonly currentPage = signal(1);
   readonly viewMode = signal<'list' | 'map'>('list');
+  readonly filtersOpen = signal(false);
+  readonly isMobile = signal(false);
   readonly filteredListings = this.listings.search(this.filters);
   readonly sortedListings = this.filteredListings;
   readonly totalPages = computed(() =>
@@ -194,6 +236,15 @@ export class HomePage {
   });
 
   constructor() {
+    const mobileQuery = window.matchMedia?.('(max-width: 1040px)');
+    const updateViewport = (): void => {
+      this.isMobile.set(mobileQuery?.matches ?? false);
+      if (!mobileQuery?.matches) this.filtersOpen.set(false);
+    };
+    updateViewport();
+    mobileQuery?.addEventListener('change', updateViewport);
+    this.destroyRef.onDestroy(() => mobileQuery?.removeEventListener('change', updateViewport));
+
     this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
       const filters = this.filtersFromParams(params);
       if (JSON.stringify(filters) !== JSON.stringify(this.filters())) {
@@ -201,6 +252,50 @@ export class HomePage {
         this.currentPage.set(1);
       }
     });
+  }
+
+  openFilters(): void {
+    this.filtersOpen.set(true);
+    setTimeout(() => this.focusableFilterElements()[0]?.focus());
+  }
+
+  closeFilters(): void {
+    this.filtersOpen.set(false);
+    setTimeout(() => this.filtersTrigger?.nativeElement.focus());
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleDrawerKeydown(event: KeyboardEvent): void {
+    if (!this.isMobile() || !this.filtersOpen()) return;
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeFilters();
+      return;
+    }
+    if (event.key !== 'Tab') return;
+
+    const focusable = this.focusableFilterElements();
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
+
+  private focusableFilterElements(): HTMLElement[] {
+    return Array.from(
+      this.filtersDrawer?.nativeElement.querySelectorAll<HTMLElement>(
+        'button:not([disabled]), input:not([disabled]), select:not([disabled]), summary, [tabindex]:not([tabindex="-1"])',
+      ) ?? [],
+    ).filter(
+      (element) =>
+        element.getClientRects().length > 0 || getComputedStyle(element).display !== 'none',
+    );
   }
 
   updateFilters(update: Partial<Filter>): void {
