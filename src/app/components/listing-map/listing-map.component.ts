@@ -1,4 +1,4 @@
-import { CurrencyPipe, isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser } from '@angular/common';
 import {
   AfterViewInit,
   ChangeDetectionStrategy,
@@ -16,6 +16,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Listing } from '../../models/listing';
+import { formatPrice, formatSurface } from '../../utils/listing-format';
 
 interface LeafletLayer {
   addTo(map: LeafletMap): LeafletLayer;
@@ -47,7 +48,7 @@ declare global {
 
 @Component({
   selector: 'app-listing-map',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './listing-map.component.scss',
   encapsulation: ViewEncapsulation.None,
@@ -80,11 +81,8 @@ declare global {
           <div>
             <p>{{ listing.type }} · {{ listing.city }}, {{ listing.district }}</p>
             <h3>{{ listing.title }}</h3>
-            <strong>{{
-              listing.price
-                | currency: (listing.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
-            }}</strong>
-            <span>{{ listing.area }} m² · {{ listing.rooms }} pièces</span>
+            <strong>{{ formatPrice(listing.price, listing.mode) }}</strong>
+            <span>{{ formatSurface(listing.area) }} · {{ listing.rooms }} pièces</span>
             <a class="detail-link" [routerLink]="['/annonces', listing.id]">Voir l’annonce</a>
           </div>
           <button
@@ -101,6 +99,8 @@ declare global {
   `,
 })
 export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy {
+  readonly formatPrice = formatPrice;
+  readonly formatSurface = formatSurface;
   private static leafletPromise?: Promise<LeafletApi>;
   private readonly platformId = inject(PLATFORM_ID);
   private readonly changeDetector = inject(ChangeDetectorRef);

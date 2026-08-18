@@ -9,7 +9,6 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { CurrencyPipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
@@ -20,12 +19,13 @@ import { ListingGridComponent } from '../../components/listing-grid/listing-grid
 import { ListingMapComponent } from '../../components/listing-map/listing-map.component';
 import { SearchPanelComponent } from '../../components/search-panel/search-panel.component';
 import { AmenityOption, EnergyRating, Filter, SelectOption, SortOption } from '../../models/filter';
-import { Listing, ListingMode, PropertyType } from '../../models/listing';
+import { Listing, ListingMode, PROPERTY_TYPES, PropertyType } from '../../models/listing';
 import { AdviceService } from '../../services/advice.service';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
 import { SavedSearchService } from '../../services/saved-search.service';
 import { RecentlyViewedService } from '../../services/recently-viewed.service';
+import { formatPrice, formatSurface } from '../../utils/listing-format';
 
 const PAGE_SIZE = 12;
 // Virtual scroll was evaluated for result sets above 100 listings. Pagination already limits
@@ -55,7 +55,6 @@ const DEFAULT_FILTERS: Filter = {
 @Component({
   selector: 'app-home-page',
   imports: [
-    CurrencyPipe,
     RouterLink,
     AdviceSectionComponent,
     FiltersPanelComponent,
@@ -208,10 +207,7 @@ const DEFAULT_FILTERS: Filter = {
                   <th scope="row">Prix</th>
                   @for (item of comparisonListings(); track item.id) {
                     <td>
-                      {{
-                        item.price
-                          | currency: (item.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
-                      }}{{ item.mode === 'rent' ? ' / mois' : '' }}
+                      {{ formatPrice(item.price, item.mode) }}
                     </td>
                   }
                 </tr>
@@ -230,7 +226,7 @@ const DEFAULT_FILTERS: Filter = {
                 <tr>
                   <th scope="row">Surface</th>
                   @for (item of comparisonListings(); track item.id) {
-                    <td>{{ item.area }} m²</td>
+                    <td>{{ formatSurface(item.area) }}</td>
                   }
                 </tr>
                 <tr>
@@ -268,11 +264,8 @@ const DEFAULT_FILTERS: Filter = {
                   <h3>
                     <a [routerLink]="['/annonces', item.id]">{{ item.title }}</a>
                   </h3>
-                  <p>{{ item.city }} · {{ item.area }} m²</p>
-                  <strong>{{
-                    item.price
-                      | currency: (item.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
-                  }}</strong>
+                  <p>{{ item.city }} · {{ formatSurface(item.area) }}</p>
+                  <strong>{{ formatPrice(item.price, item.mode) }}</strong>
                 </div>
               </article>
             }
@@ -284,6 +277,8 @@ const DEFAULT_FILTERS: Filter = {
   `,
 })
 export class HomePage {
+  readonly formatPrice = formatPrice;
+  readonly formatSurface = formatSurface;
   @ViewChild('filtersDrawer') private filtersDrawer?: ElementRef<HTMLElement>;
   @ViewChild('filtersTrigger') private filtersTrigger?: ElementRef<HTMLButtonElement>;
   readonly listings = inject(ListingService);
@@ -299,7 +294,7 @@ export class HomePage {
     { label: 'Acheter', value: 'buy' },
     { label: 'Louer', value: 'rent' },
   ];
-  readonly propertyTypes: PropertyType[] = ['Appartement', 'Maison', 'Villa', 'Studio', 'Loft'];
+  readonly propertyTypes: PropertyType[] = [...PROPERTY_TYPES];
   readonly cities = [
     'Toutes les villes',
     'Casablanca',

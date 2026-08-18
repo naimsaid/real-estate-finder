@@ -1,4 +1,3 @@
-import { CurrencyPipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -11,10 +10,11 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
 import { RecentlyViewedService } from '../../services/recently-viewed.service';
+import { formatPrice, formatSurface } from '../../utils/listing-format';
 
 @Component({
   selector: 'app-listing-detail-page',
-  imports: [CurrencyPipe, HeaderComponent, RouterLink],
+  imports: [HeaderComponent, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <main class="app-shell">
@@ -26,9 +26,10 @@ import { RecentlyViewedService } from '../../services/recently-viewed.service';
             <section class="detail-gallery" aria-label="Galerie photos de l’annonce">
               @for (image of item.images; track image; let index = $index) {
                 <button
+                  #galleryTrigger
                   class="gallery-item"
                   type="button"
-                  (click)="openLightbox(index)"
+                  (click)="openLightbox(index, galleryTrigger)"
                   [attr.aria-label]="
                     'Agrandir la photo ' + (index + 1) + ' sur ' + item.images.length
                   "
@@ -47,15 +48,11 @@ import { RecentlyViewedService } from '../../services/recently-viewed.service';
             <div class="detail-copy">
               <p class="eyebrow">{{ item.type }} · {{ item.city }}</p>
               <h1>{{ item.title }}</h1>
-              <strong class="detail-price"
-                >{{
-                  item.price | currency: (item.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
-                }}{{ item.mode === 'rent' ? ' / mois' : '' }}</strong
-              >
+              <strong class="detail-price">{{ formatPrice(item.price, item.mode) }}</strong>
               <dl class="features detail-features">
                 <div>
                   <dt>Surface</dt>
-                  <dd>{{ item.area }} m2</dd>
+                  <dd>{{ formatSurface(item.area) }}</dd>
                 </div>
                 <div>
                   <dt>Pièces</dt>
@@ -127,6 +124,7 @@ import { RecentlyViewedService } from '../../services/recently-viewed.service';
               aria-modal="true"
               aria-label="Galerie photos en plein écran"
               (click)="closeFromBackdrop($event)"
+              (keydown)="handleLightboxKeyboard($event)"
             >
               <button
                 #lightboxClose
@@ -182,11 +180,14 @@ import { RecentlyViewedService } from '../../services/recently-viewed.service';
   `,
 })
 export class ListingDetailPage {
+  readonly formatPrice = formatPrice;
+  readonly formatSurface = formatSurface;
   private readonly fallbackImage = '/assets/fallback-property.jpg';
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly route = inject(ActivatedRoute);
   private readonly listings = inject(ListingService);
   private readonly recentlyViewed = inject(RecentlyViewedService);
+  private lightboxTrigger?: HTMLElement;
   readonly favorites = inject(FavoriteService);
   readonly listing = this.listings.getListingById(Number(this.route.snapshot.paramMap.get('id')));
   lightboxOpen = false;
@@ -196,16 +197,21 @@ export class ListingDetailPage {
     if (this.listing) this.recentlyViewed.record(this.listing.id);
   }
 
-  openLightbox(index: number): void {
+  openLightbox(index: number, trigger?: HTMLElement): void {
     this.activeImageIndex = index;
+    this.lightboxTrigger = trigger;
     this.lightboxOpen = true;
     queueMicrotask(() =>
-      this.elementRef.nativeElement.querySelector<HTMLElement>('.lightbox-close')?.focus(),
+      (this.elementRef.nativeElement as HTMLElement)
+        .querySelector<HTMLElement>('.lightbox-close')
+        ?.focus(),
     );
   }
 
   closeLightbox(): void {
     this.lightboxOpen = false;
+    this.lightboxTrigger?.focus();
+    this.lightboxTrigger = undefined;
   }
 
   closeFromBackdrop(event: MouseEvent): void {
@@ -240,9 +246,16 @@ export class ListingDetailPage {
     }
   }
 
+  handleLightboxKeyboard(event: KeyboardEvent): void {
+    event.stopPropagation();
+    this.handleKeyboard(event);
+  }
+
   private trapFocus(event: KeyboardEvent): void {
     const controls = Array.from(
-      this.elementRef.nativeElement.querySelectorAll<HTMLElement>('.lightbox button'),
+      (this.elementRef.nativeElement as HTMLElement).querySelectorAll<HTMLElement>(
+        '.lightbox button',
+      ),
     );
     if (!controls.length) return;
 

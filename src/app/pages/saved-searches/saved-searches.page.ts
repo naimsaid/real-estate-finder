@@ -6,6 +6,7 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { Filter } from '../../models/filter';
 import { SavedSearch } from '../../models/saved-search';
 import { SavedSearchService } from '../../services/saved-search.service';
+import { formatPrice, formatSurface } from '../../utils/listing-format';
 
 @Component({
   selector: 'app-saved-searches-page',
@@ -97,10 +98,10 @@ export class SavedSearchesPage {
 
   criteria(filters: Filter): string[] {
     const criteria = [
-      `Budget max. ${new Intl.NumberFormat('fr-FR').format(filters.maxBudget)} ${filters.mode === 'buy' ? 'MAD' : 'MAD/mois'}`,
+      `Budget max. ${formatPrice(filters.maxBudget, filters.mode)}`,
       `${filters.minRooms}+ pièce${filters.minRooms > 1 ? 's' : ''}`,
     ];
-    if (filters.minArea > 0) criteria.push(`Dès ${filters.minArea} m²`);
+    if (filters.minArea > 0) criteria.push(`Dès ${formatSurface(filters.minArea)}`);
     if (filters.amenities.length) criteria.push(...filters.amenities);
     if (filters.query) criteria.push(`Mot-clé : ${filters.query}`);
     return criteria;
