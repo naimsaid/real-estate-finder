@@ -1,4 +1,4 @@
-import { inject, Injectable, signal } from '@angular/core';
+import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { Filter } from '../models/filter';
 import { Listing } from '../models/listing';
 import { LISTING_REPOSITORY } from '../repositories/listing.repository';
@@ -27,6 +27,20 @@ export class ListingService {
 
   getListingById(id: number): Listing | undefined {
     return this.repository.getListingById(id);
+  }
+
+  search(filters: Signal<Filter>): Signal<readonly Listing[]> {
+    const criteria = computed(
+      () => {
+        const { sortBy, ...criteria } = filters();
+        void sortBy;
+        return criteria;
+      },
+      { equal: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
+    );
+    const matches = computed(() => this.filterMatches(this.listings(), criteria()));
+
+    return computed(() => this.sort(matches(), filters().sortBy));
   }
 
   filter(listings: readonly Listing[], filters: Filter): Listing[] {

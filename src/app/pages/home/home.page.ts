@@ -120,20 +120,7 @@ export class HomePage {
     query: '',
   });
   readonly currentPage = signal(1);
-  private readonly criteria = computed(
-    () => {
-      const { sortBy, ...criteria } = this.filters();
-      void sortBy;
-      return criteria;
-    },
-    { equal: (a, b) => JSON.stringify(a) === JSON.stringify(b) },
-  );
-  private readonly matchingListings = computed(() =>
-    this.listings.filterMatches(this.listings.listings(), this.criteria()),
-  );
-  readonly filteredListings = computed(() =>
-    this.listings.sort(this.matchingListings(), this.filters().sortBy),
-  );
+  readonly filteredListings = this.listings.search(this.filters);
   readonly sortedListings = this.filteredListings;
   readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.sortedListings().length / PAGE_SIZE)),
