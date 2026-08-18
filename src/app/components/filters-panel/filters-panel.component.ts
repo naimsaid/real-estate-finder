@@ -2,7 +2,7 @@ import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
-import { AmenityOption, ListingFilters, SelectOption, SortOption } from '../../models/filter';
+import { AmenityOption, Filter, SelectOption, SortOption } from '../../models/filter';
 import { PropertyType } from '../../models/listing';
 
 @Component({
@@ -27,11 +27,11 @@ import { PropertyType } from '../../models/listing';
   `,
 })
 export class FiltersPanelComponent {
-  @Input({ required: true }) filters!: ListingFilters;
+  @Input({ required: true }) filters!: Filter;
   @Input({ required: true }) propertyTypes!: PropertyType[];
   @Input({ required: true }) amenities!: AmenityOption[];
   @Input({ required: true }) sortOptions!: SelectOption<SortOption>[];
-  @Output() readonly filtersChange = new EventEmitter<Partial<ListingFilters>>();
+  @Output() readonly filtersChange = new EventEmitter<Partial<Filter>>();
   @Output() readonly resetFilters = new EventEmitter<void>();
 
   get budgetStep(): number { return this.filters.mode === 'buy' ? 50000 : 250; }
@@ -39,7 +39,7 @@ export class FiltersPanelComponent {
   get budgetMin(): number { return this.filters.mode === 'buy' ? 500000 : 1000; }
   get minAreaPercent(): number { return (this.filters.minArea / 500) * 100; }
   get maxAreaPercent(): number { return (this.filters.maxArea / 500) * 100; }
-  patch(update: Partial<ListingFilters>): void { this.filtersChange.emit(update); }
+  patch(update: Partial<Filter>): void { this.filtersChange.emit(update); }
   onNewOnlyChange(event: Event): void {
     if (event.target instanceof HTMLInputElement) {
       this.patch({ newOnly: event.target.checked });

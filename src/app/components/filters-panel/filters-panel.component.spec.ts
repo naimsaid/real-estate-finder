@@ -1,8 +1,8 @@
 import { FiltersPanelComponent } from './filters-panel.component';
-import { ListingFilters } from '../../models/filter';
+import { Filter } from '../../models/filter';
 
 describe('FiltersPanelComponent', () => {
-  const filters: ListingFilters = {
+  const filters: Filter = {
     mode: 'buy',
     city: 'Toutes les villes',
     propertyType: 'Tous',
@@ -26,7 +26,7 @@ describe('FiltersPanelComponent', () => {
   });
 
   it('emits filter patches', () => {
-    const emitted: Partial<ListingFilters>[] = [];
+    const emitted: Partial<Filter>[] = [];
     component.filtersChange.subscribe((value) => emitted.push(value));
 
     component.patch({ maxBudget: 2000000 });
@@ -35,7 +35,7 @@ describe('FiltersPanelComponent', () => {
   });
 
   it('adds and removes amenities without mutating the input', () => {
-    const emitted: Partial<ListingFilters>[] = [];
+    const emitted: Partial<Filter>[] = [];
     component.filtersChange.subscribe((value) => emitted.push(value));
 
     component.toggleAmenity('Terrasse');
@@ -46,7 +46,7 @@ describe('FiltersPanelComponent', () => {
   });
 
   it('keeps a minimum gap between surface bounds', () => {
-    const emitted: Partial<ListingFilters>[] = [];
+    const emitted: Partial<Filter>[] = [];
     component.filtersChange.subscribe((value) => emitted.push(value));
 
     component.setMinArea(250);
@@ -68,7 +68,7 @@ describe('FiltersPanelComponent', () => {
   });
 
   it('handles the new-only checkbox without template casts', () => {
-    const emitted: Partial<ListingFilters>[] = [];
+    const emitted: Partial<Filter>[] = [];
     component.filtersChange.subscribe((value) => emitted.push(value));
     const checkbox = document.createElement('input');
     checkbox.type = 'checkbox';

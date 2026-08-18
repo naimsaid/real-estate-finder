@@ -1,7 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { PropertyListing } from '../../models/listing';
+import { Listing } from '../../models/listing';
 
 @Component({
   selector: 'app-listing-card',
@@ -80,7 +80,7 @@ import { PropertyListing } from '../../models/listing';
 })
 export class ListingCardComponent {
   private readonly fallbackImage = '/assets/fallback-property.jpg';
-  @Input({ required: true }) listing!: PropertyListing;
+  @Input({ required: true }) listing!: Listing;
   @Input() favorite = false;
   @Output() readonly favoriteToggle = new EventEmitter<number>();
 

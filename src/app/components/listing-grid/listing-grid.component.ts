@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { SelectOption, SortOption } from '../../models/filter';
-import { PropertyListing } from '../../models/listing';
+import { Listing } from '../../models/listing';
 import { ListingCardComponent } from '../listing-card/listing-card.component';
 
 @Component({
@@ -89,7 +89,7 @@ import { ListingCardComponent } from '../listing-card/listing-card.component';
   `,
 })
 export class ListingGridComponent {
-  @Input({ required: true }) listings!: PropertyListing[];
+  @Input({ required: true }) listings!: Listing[];
   @Input() totalListings?: number;
   @Input() currentPage = 1;
   @Input() totalPages = 1;

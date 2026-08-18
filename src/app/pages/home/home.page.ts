@@ -4,7 +4,7 @@ import { FiltersPanelComponent } from '../../components/filters-panel/filters-pa
 import { HeaderComponent } from '../../components/header/header.component';
 import { ListingGridComponent } from '../../components/listing-grid/listing-grid.component';
 import { SearchPanelComponent } from '../../components/search-panel/search-panel.component';
-import { AmenityOption, ListingFilters, SelectOption, SortOption } from '../../models/filter';
+import { AmenityOption, Filter, SelectOption, SortOption } from '../../models/filter';
 import { ListingMode, PropertyType } from '../../models/listing';
 import { AdviceService } from '../../services/advice.service';
 import { FavoriteService } from '../../services/favorite.service';
@@ -104,7 +104,7 @@ export class HomePage {
     { label: 'Prix décroissant', value: 'priceDesc' },
   ];
   readonly advice = this.adviceService.getAdvice();
-  readonly filters = signal<ListingFilters>({
+  readonly filters = signal<Filter>({
     mode: 'buy',
     city: 'Toutes les villes',
     propertyType: 'Tous',
@@ -143,7 +143,7 @@ export class HomePage {
     return this.sortedListings().slice(start, start + PAGE_SIZE);
   });
 
-  updateFilters(update: Partial<ListingFilters>): void {
+  updateFilters(update: Partial<Filter>): void {
     this.filters.update((filters) => ({ ...filters, ...update }));
     this.currentPage.set(1);
   }
