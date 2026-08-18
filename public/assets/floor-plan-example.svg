@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 700" role="img" aria-labelledby="title desc">
+  <title id="title">Plan d’étage</title>
+  <desc id="desc">Plan schématique d’un appartement avec séjour, cuisine, trois chambres et deux salles de bain.</desc>
+  <rect width="1000" height="700" fill="#f7f3e9"/>
+  <g fill="none" stroke="#173c62" stroke-width="14">
+    <rect x="70" y="60" width="860" height="580"/>
+    <path d="M590 60v580M70 390h520M590 330h340M780 330v310M330 390v250"/>
+  </g>
+  <g fill="#173c62" font-family="sans-serif" font-size="28" font-weight="700" text-anchor="middle">
+    <text x="330" y="220">Séjour</text>
+    <text x="760" y="200">Cuisine</text>
+    <text x="200" y="525">Chambre 1</text>
+    <text x="460" y="525">Chambre 2</text>
+    <text x="685" y="500">Chambre 3</text>
+    <text x="855" y="470">Sdb</text>
+  </g>
+</svg>

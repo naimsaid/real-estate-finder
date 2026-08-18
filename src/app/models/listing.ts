@@ -18,6 +18,8 @@ export interface Listing {
   bathrooms: number;
   image: string;
   images: string[];
+  floorPlans?: string[];
+  virtualTourUrl?: string;
   tags: string[];
   description: string;
   contactEmail: string;
