@@ -28,6 +28,8 @@ import { SavedSearchService } from '../../services/saved-search.service';
 import { RecentlyViewedService } from '../../services/recently-viewed.service';
 
 const PAGE_SIZE = 12;
+// Virtual scroll was evaluated for result sets above 100 listings. Pagination already limits
+// the rendered DOM to 12 cards, so adding a virtualization dependency would only grow the bundle.
 const DEFAULT_FILTERS: Filter = {
   mode: 'buy',
   city: 'Toutes les villes',
