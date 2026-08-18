@@ -329,13 +329,20 @@
   font-weight: 900;
 }
 
-.favorite-detail {
+.favorite-detail,
+.share-detail {
   background: #ffffff;
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--muted);
   font-weight: 900;
   padding: 11px 16px;
+}
+
+.share-feedback {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
 }
 
 .detail-features {

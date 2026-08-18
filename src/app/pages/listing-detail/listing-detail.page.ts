@@ -5,6 +5,7 @@ import {
   HostListener,
   inject,
 } from '@angular/core';
+import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HeaderComponent } from '../../components/header/header.component';
@@ -125,7 +126,20 @@ type GalleryMedia = {
                     favorites.isFavorite(item.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'
                   }}
                 </button>
+                <button
+                  class="share-detail"
+                  type="button"
+                  (click)="shareListing()"
+                  [attr.aria-label]="'Partager l’annonce ' + item.title"
+                >
+                  Partager l’annonce
+                </button>
               </div>
+              @if (shareFeedback) {
+                <p class="share-feedback" role="status" aria-live="polite">
+                  {{ shareFeedback }}
+                </p>
+              }
             </div>
           </article>
           @if (lightboxOpen) {
@@ -202,6 +216,7 @@ export class ListingDetailPage {
   readonly formatPrice = formatPrice;
   readonly formatSurface = formatSurface;
   private readonly fallbackImage = '/assets/fallback-property.jpg';
+  private readonly document = inject(DOCUMENT);
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly route = inject(ActivatedRoute);
   private readonly listings = inject(ListingService);
@@ -212,6 +227,7 @@ export class ListingDetailPage {
   readonly listing = this.listings.getListingById(Number(this.route.snapshot.paramMap.get('id')));
   lightboxOpen = false;
   activeImageIndex = 0;
+  shareFeedback = '';
   private touchStartX?: number;
 
   readonly galleryMedia: readonly GalleryMedia[] = this.listing
@@ -230,6 +246,43 @@ export class ListingDetailPage {
 
   constructor() {
     if (this.listing) this.recentlyViewed.record(this.listing.id);
+  }
+
+  async shareListing(): Promise<void> {
+    if (!this.listing) return;
+
+    this.shareFeedback = '';
+    const navigator = this.document.defaultView?.navigator;
+    if (!navigator) return;
+
+    if (typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: this.listing.title,
+          text: `Découvrez cette annonce à ${this.listing.city} sur Habita.`,
+          url: this.shareUrl('web_share'),
+        });
+        this.shareFeedback = 'Annonce partagée.';
+        return;
+      } catch (error) {
+        if (error instanceof DOMException && error.name === 'AbortError') return;
+      }
+    }
+
+    try {
+      await navigator.clipboard.writeText(this.shareUrl('clipboard'));
+      this.shareFeedback = 'Lien copié dans le presse-papiers.';
+    } catch {
+      this.shareFeedback = 'Impossible de copier le lien.';
+    }
+  }
+
+  private shareUrl(medium: 'web_share' | 'clipboard'): string {
+    const url = new URL(`/annonces/${this.listing?.id}`, this.document.location.origin);
+    url.searchParams.set('utm_source', 'habita');
+    url.searchParams.set('utm_medium', medium);
+    url.searchParams.set('utm_campaign', 'listing_share');
+    return url.toString();
   }
 
   openLightbox(index: number, trigger?: HTMLElement): void {
