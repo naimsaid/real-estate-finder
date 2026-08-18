@@ -3,21 +3,22 @@ import {
   Component,
   ElementRef,
   HostListener,
+  OnDestroy,
   inject,
 } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
+import { DomSanitizer, Meta, SafeResourceUrl, Title } from '@angular/platform-browser';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
 import { RecentlyViewedService } from '../../services/recently-viewed.service';
 import { formatPrice, formatSurface } from '../../utils/listing-format';
 
-type GalleryMedia = {
+interface GalleryMedia {
   kind: 'photo' | 'floor-plan' | 'virtual-tour';
   src: string;
-};
+}
 
 @Component({
   selector: 'app-listing-detail-page',
@@ -212,7 +213,7 @@ type GalleryMedia = {
     </main>
   `,
 })
-export class ListingDetailPage {
+export class ListingDetailPage implements OnDestroy {
   readonly formatPrice = formatPrice;
   readonly formatSurface = formatSurface;
   private readonly fallbackImage = '/assets/fallback-property.jpg';
@@ -222,6 +223,9 @@ export class ListingDetailPage {
   private readonly listings = inject(ListingService);
   private readonly recentlyViewed = inject(RecentlyViewedService);
   private readonly sanitizer = inject(DomSanitizer);
+  private readonly title = inject(Title);
+  private readonly meta = inject(Meta);
+  private structuredDataElement?: HTMLScriptElement;
   private lightboxTrigger?: HTMLElement;
   readonly favorites = inject(FavoriteService);
   readonly listing = this.listings.getListingById(Number(this.route.snapshot.paramMap.get('id')));
@@ -245,7 +249,65 @@ export class ListingDetailPage {
   }
 
   constructor() {
-    if (this.listing) this.recentlyViewed.record(this.listing.id);
+    if (this.listing) {
+      this.recentlyViewed.record(this.listing.id);
+      this.setListingMetadata();
+    }
+  }
+
+  ngOnDestroy(): void {
+    this.structuredDataElement?.remove();
+  }
+
+  private setListingMetadata(): void {
+    if (!this.listing) return;
+    const listing = this.listing;
+    const description = `${listing.type} ${listing.mode === 'buy' ? 'à vendre' : 'à louer'} à ${listing.city}, ${listing.district} — ${listing.area} m², ${listing.rooms} pièces. ${listing.description}`;
+    const canonicalUrl = new URL(`/annonces/${listing.id}`, this.document.location.origin).toString();
+
+    this.title.setTitle(`${listing.title} à ${listing.city} | Habita`);
+    this.meta.updateTag({ name: 'description', content: description });
+    this.meta.updateTag({ property: 'og:type', content: 'website' });
+    this.meta.updateTag({ property: 'og:title', content: `${listing.title} à ${listing.city}` });
+    this.meta.updateTag({ property: 'og:description', content: description });
+    this.meta.updateTag({ property: 'og:image', content: listing.image });
+    this.meta.updateTag({ property: 'og:url', content: canonicalUrl });
+
+    const structuredData = {
+      '@context': 'https://schema.org',
+      '@type': 'RealEstateListing',
+      name: listing.title,
+      description: listing.description,
+      url: canonicalUrl,
+      image: listing.images,
+      datePosted: listing.publishedAt,
+      offers: {
+        '@type': 'Offer',
+        price: listing.price,
+        priceCurrency: listing.city === 'Paris' ? 'EUR' : 'MAD',
+        availability: 'https://schema.org/InStock',
+      },
+      address: {
+        '@type': 'PostalAddress',
+        streetAddress: listing.district,
+        addressLocality: listing.city,
+        postalCode: listing.postalCode,
+      },
+      geo: {
+        '@type': 'GeoCoordinates',
+        latitude: listing.latitude,
+        longitude: listing.longitude,
+      },
+      floorSize: { '@type': 'QuantitativeValue', value: listing.area, unitCode: 'MTK' },
+      numberOfRooms: listing.rooms,
+      numberOfBedrooms: listing.bedrooms,
+    };
+    const script = this.document.createElement('script');
+    script.type = 'application/ld+json';
+    script.dataset['listingStructuredData'] = 'true';
+    script.textContent = JSON.stringify(structuredData).replace(/</g, '\\u003c');
+    this.document.head.appendChild(script);
+    this.structuredDataElement = script;
   }
 
   async shareListing(): Promise<void> {

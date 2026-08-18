@@ -1,10 +1,12 @@
-import { Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 
 const RECENTLY_VIEWED_STORAGE_KEY = 'real-estate-finder:recently-viewed';
 const MAX_RECENTLY_VIEWED = 6;
 
 @Injectable({ providedIn: 'root' })
 export class RecentlyViewedService {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly ids = signal<number[]>(this.load());
   readonly recentlyViewedIds = this.ids.asReadonly();
 
@@ -15,6 +17,7 @@ export class RecentlyViewedService {
       MAX_RECENTLY_VIEWED,
     );
     this.ids.set(updated);
+    if (!this.isBrowser) return;
     try {
       localStorage.setItem(RECENTLY_VIEWED_STORAGE_KEY, JSON.stringify(updated));
     } catch {
@@ -23,6 +26,7 @@ export class RecentlyViewedService {
   }
 
   private load(): number[] {
+    if (!this.isBrowser) return [];
     try {
       const value: unknown = JSON.parse(localStorage.getItem(RECENTLY_VIEWED_STORAGE_KEY) ?? '[]');
       if (!Array.isArray(value) || !value.every(Number.isFinite)) return [];

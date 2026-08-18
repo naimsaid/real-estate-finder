@@ -2,6 +2,7 @@ import {
   ApplicationConfig,
   provideBrowserGlobalErrorListeners,
 } from '@angular/core';
+import { provideClientHydration, withEventReplay } from '@angular/platform-browser';
 import { provideRouter } from '@angular/router';
 import {
   LucideArrowUpDown,
@@ -27,6 +28,7 @@ import { StaticListingRepository } from './repositories/static-listing.repositor
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
+    provideClientHydration(withEventReplay()),
     provideRouter(routes),
     { provide: LISTING_REPOSITORY, useExisting: StaticListingRepository },
     provideLucideIcons(

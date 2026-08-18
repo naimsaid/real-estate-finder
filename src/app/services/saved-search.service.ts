@@ -1,4 +1,5 @@
-import { Injectable, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
 import { Filter } from '../models/filter';
 import { SavedSearch } from '../models/saved-search';
 
@@ -6,6 +7,7 @@ const STORAGE_KEY = 'real-estate-finder:saved-searches';
 
 @Injectable({ providedIn: 'root' })
 export class SavedSearchService {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly searches = signal<SavedSearch[]>(this.load());
   readonly savedSearches = this.searches.asReadonly();
 
@@ -39,6 +41,7 @@ export class SavedSearchService {
   }
 
   private load(): SavedSearch[] {
+    if (!this.isBrowser) return [];
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored === null) return [];
@@ -67,6 +70,7 @@ export class SavedSearchService {
 
   private update(searches: SavedSearch[]): void {
     this.searches.set(searches);
+    if (!this.isBrowser) return;
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(searches));
     } catch {

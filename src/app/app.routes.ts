@@ -8,7 +8,7 @@ import { SavedSearchesPage } from './pages/saved-searches/saved-searches.page';
 
 export const routes: Routes = [
   { path: '', component: HomePage, title: 'Annonces | Habita' },
-  { path: 'annonces/:id', component: ListingDetailPage, title: 'Détail de l’annonce | Habita' },
+  { path: 'annonces/:id', component: ListingDetailPage },
   { path: 'favoris', component: FavoritesPage, title: 'Favoris | Habita' },
   { path: 'publier', component: PublishPage, title: 'Publier une annonce | Habita' },
   { path: 'compte/recherches', component: SavedSearchesPage, title: 'Mes recherches | Habita' },
