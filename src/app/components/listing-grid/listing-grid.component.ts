@@ -56,7 +56,10 @@ import { ListingCardComponent } from '../listing-card/listing-card.component';
             <app-listing-card
               [listing]="listing"
               [favorite]="favoriteIds.includes(listing.id)"
+              [selectedForComparison]="comparisonIds.includes(listing.id)"
+              [comparisonDisabled]="comparisonIds.length >= 3"
               (favoriteToggle)="favoriteToggle.emit($event)"
+              (comparisonToggle)="comparisonToggle.emit($event)"
             />
           }
         </div>
@@ -98,8 +101,10 @@ export class ListingGridComponent {
   @Input({ required: true }) sortOptions!: SelectOption<SortOption>[];
   @Input({ required: true }) sortBy!: SortOption;
   @Input() favoriteIds: number[] = [];
+  @Input() comparisonIds: number[] = [];
   @Output() readonly sortChange = new EventEmitter<SortOption>();
   @Output() readonly favoriteToggle = new EventEmitter<number>();
+  @Output() readonly comparisonToggle = new EventEmitter<number>();
   @Output() readonly pageChange = new EventEmitter<number>();
   readonly skeletonItems = [1, 2, 3, 4];
 }

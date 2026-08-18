@@ -95,6 +95,22 @@
   }
 }
 
+.compare-control {
+  align-items: center;
+  color: var(--accent);
+  display: flex;
+  font-size: 0.85rem;
+  font-weight: 900;
+  gap: 8px;
+  justify-content: flex-end;
+
+  input {
+    accent-color: var(--accent);
+    height: 18px;
+    width: 18px;
+  }
+}
+
 .detail-link,
 .back-link {
   color: var(--accent);

@@ -10,6 +10,7 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
+import { RecentlyViewedService } from '../../services/recently-viewed.service';
 
 @Component({
   selector: 'app-listing-detail-page',
@@ -185,10 +186,15 @@ export class ListingDetailPage {
   private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly route = inject(ActivatedRoute);
   private readonly listings = inject(ListingService);
+  private readonly recentlyViewed = inject(RecentlyViewedService);
   readonly favorites = inject(FavoriteService);
   readonly listing = this.listings.getListingById(Number(this.route.snapshot.paramMap.get('id')));
   lightboxOpen = false;
   activeImageIndex = 0;
+
+  constructor() {
+    if (this.listing) this.recentlyViewed.record(this.listing.id);
+  }
 
   openLightbox(index: number): void {
     this.activeImageIndex = index;
