@@ -185,7 +185,7 @@ const DEFAULT_FILTERS: Filter = {
           @if (viewMode() === 'list') {
             <app-listing-grid
               [listings]="paginatedListings()"
-              [totalListings]="sortedListings().length"
+              [totalListings]="listedListings().length"
               [currentPage]="currentPage()"
               [totalPages]="totalPages()"
               [loading]="listings.isLoading()"
@@ -200,7 +200,10 @@ const DEFAULT_FILTERS: Filter = {
               (comparisonToggle)="toggleComparison($event)"
             />
           } @else {
-            <app-listing-map [listings]="sortedListings()" />
+            <app-listing-map
+              [listings]="sortedListings()"
+              (visibleListingsChange)="updateVisibleMapListings($event)"
+            />
           }
         </div>
       </section>
@@ -367,6 +370,7 @@ export class HomePage {
   readonly filters = signal<Filter>(this.filtersFromParams(this.route.snapshot.queryParamMap));
   readonly currentPage = signal(1);
   readonly viewMode = signal<'list' | 'map'>('list');
+  readonly visibleMapListings = signal<readonly Listing[] | null>(null);
   readonly comparisonIds = signal<number[]>([]);
   readonly filtersOpen = signal(false);
   readonly isMobile = signal(false);
@@ -374,12 +378,18 @@ export class HomePage {
   readonly activeFilterSummary = computed(() => this.summarizeActiveFilters(this.filters()));
   readonly filteredListings = this.listings.search(this.filters);
   readonly sortedListings = this.filteredListings;
+  readonly listedListings = computed(() => {
+    const visibleListings = this.visibleMapListings();
+    if (!visibleListings) return this.sortedListings();
+    const visibleIds = new Set(visibleListings.map(({ id }) => id));
+    return this.sortedListings().filter(({ id }) => visibleIds.has(id));
+  });
   readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.sortedListings().length / PAGE_SIZE)),
+    Math.max(1, Math.ceil(this.listedListings().length / PAGE_SIZE)),
   );
   readonly paginatedListings = computed(() => {
     const start = (this.currentPage() - 1) * PAGE_SIZE;
-    return this.sortedListings().slice(start, start + PAGE_SIZE);
+    return this.listedListings().slice(start, start + PAGE_SIZE);
   });
   readonly comparisonListings = computed(() => this.resolveListings(this.comparisonIds()));
   readonly recentlyViewedListings = computed(() =>
@@ -460,6 +470,10 @@ export class HomePage {
   }
   changePage(page: number): void {
     if (page >= 1 && page <= this.totalPages()) this.currentPage.set(page);
+  }
+  updateVisibleMapListings(listings: readonly Listing[]): void {
+    this.visibleMapListings.set(listings);
+    this.currentPage.set(1);
   }
   changeMode(mode: ListingMode): void {
     this.updateFilters({ mode, maxBudget: mode === 'buy' ? 4000000 : 12000 });
