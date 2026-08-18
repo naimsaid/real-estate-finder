@@ -808,6 +808,27 @@ select:focus {
   }
 }
 
+.filter-section-heading {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 18px;
+
+  h3 {
+    font-size: 0.95rem;
+    margin: 0;
+  }
+
+  button {
+    background: transparent;
+    border: 0;
+    color: var(--accent);
+    font-size: 0.78rem;
+    font-weight: 900;
+    padding: 8px 0 8px 12px;
+  }
+}
+
 .chip-list {
   display: flex;
   flex-wrap: wrap;
@@ -1300,7 +1321,14 @@ select:focus {
   }
 }
 
-@media (max-width: 1040px) {
+@media (min-width: 768px) and (max-width: 1040px) {
+  .content-grid,
+  .listing-detail {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
   .content-grid {
     grid-template-columns: 1fr;
   }
@@ -1317,9 +1345,32 @@ select:focus {
     color: #ffffff;
     display: inline-flex;
     font-weight: 900;
-    justify-content: center;
+    gap: 10px;
+    justify-content: flex-start;
     min-height: 48px;
     width: 100%;
+
+    .filter-count {
+      align-items: center;
+      background: #ffffff;
+      border-radius: 999px;
+      color: var(--accent);
+      display: inline-flex;
+      height: 24px;
+      justify-content: center;
+      min-width: 24px;
+      padding-inline: 7px;
+    }
+
+    .active-filter-summary {
+      font-size: 0.8rem;
+      font-weight: 700;
+      margin-left: auto;
+      max-width: 55%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
   }
 
   .filters-backdrop {
@@ -1329,6 +1380,7 @@ select:focus {
     inset: 0;
     position: fixed;
     z-index: 99;
+    animation: filters-backdrop-in 180ms ease-out;
   }
 
   .filters-drawer {
@@ -1339,10 +1391,12 @@ select:focus {
     left: 0;
     max-height: min(88vh, 760px);
     overflow-y: auto;
+    overscroll-behavior: contain;
     position: fixed;
     right: 0;
     transform: translateY(105%);
     transition: transform 180ms ease-out;
+    will-change: transform;
     z-index: 100;
 
     &.open {
@@ -1369,9 +1423,26 @@ select:focus {
     background: var(--card);
     z-index: 1;
 
+    > div {
+      margin-right: auto;
+    }
+
     h2 {
       font-size: 1.25rem;
       margin: 0;
+    }
+
+    .filters-summary {
+      color: var(--muted);
+      display: block;
+      font-size: 0.78rem;
+      margin-top: 2px;
+    }
+
+    .sheet-reset {
+      border: 0;
+      color: var(--accent);
+      padding-inline: 4px;
     }
 
     button {
@@ -1381,6 +1452,25 @@ select:focus {
       min-height: 44px;
       padding-inline: 14px;
     }
+  }
+}
+
+@keyframes filters-backdrop-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .filters-drawer {
+    transition: none;
+  }
+
+  .filters-backdrop {
+    animation: none;
   }
 }
 

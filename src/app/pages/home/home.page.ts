@@ -99,7 +99,13 @@ const DEFAULT_FILTERS: Filter = {
           [attr.aria-expanded]="filtersOpen()"
           (click)="openFilters()"
         >
-          Afficher les filtres
+          <span>Filtres</span>
+          @if (activeFilterCount() > 0) {
+            <span class="filter-count" aria-label="Nombre de filtres actifs">{{
+              activeFilterCount()
+            }}</span>
+            <span class="active-filter-summary">{{ activeFilterSummary() }}</span>
+          }
         </button>
         @if (filtersOpen()) {
           <button
@@ -120,9 +126,19 @@ const DEFAULT_FILTERS: Filter = {
           [attr.inert]="isMobile() && !filtersOpen() ? '' : null"
         >
           <div class="filters-drawer-heading">
-            <h2 id="filters-drawer-title">Filtres</h2>
+            <div>
+              <h2 id="filters-drawer-title">Filtres</h2>
+              <span class="filters-summary" aria-live="polite">
+                {{ activeFilterCount() }} filtre{{ activeFilterCount() > 1 ? 's' : '' }} actif{{
+                  activeFilterCount() > 1 ? 's' : ''
+                }}
+              </span>
+            </div>
+            <button class="sheet-reset" type="button" (click)="resetAdvancedFilters()">
+              Tout reinitialiser
+            </button>
             <button type="button" aria-label="Fermer les filtres" (click)="closeFilters()">
-              Fermer
+              ✕
             </button>
           </div>
           <app-filters-panel
@@ -354,6 +370,8 @@ export class HomePage {
   readonly comparisonIds = signal<number[]>([]);
   readonly filtersOpen = signal(false);
   readonly isMobile = signal(false);
+  readonly activeFilterCount = computed(() => this.countActiveFilters(this.filters()));
+  readonly activeFilterSummary = computed(() => this.summarizeActiveFilters(this.filters()));
   readonly filteredListings = this.listings.search(this.filters);
   readonly sortedListings = this.filteredListings;
   readonly totalPages = computed(() =>
@@ -369,7 +387,7 @@ export class HomePage {
   );
 
   constructor() {
-    const mobileQuery = window.matchMedia?.('(max-width: 1040px)');
+    const mobileQuery = window.matchMedia?.('(max-width: 767px)');
     const updateViewport = (): void => {
       this.isMobile.set(mobileQuery?.matches ?? false);
       if (!mobileQuery?.matches) this.filtersOpen.set(false);
@@ -448,6 +466,8 @@ export class HomePage {
   }
   resetAdvancedFilters(): void {
     this.updateFilters({
+      propertyType: 'Tous',
+      maxBudget: this.filters().mode === 'buy' ? 4000000 : 12000,
       minBedrooms: 0,
       minBathrooms: 0,
       minArea: 0,
@@ -462,6 +482,38 @@ export class HomePage {
       maxFloor: 0,
       energyRatings: [],
     });
+  }
+
+  private countActiveFilters(filters: Filter): number {
+    return [
+      filters.city !== DEFAULT_FILTERS.city,
+      filters.propertyType !== DEFAULT_FILTERS.propertyType,
+      filters.maxBudget !== (filters.mode === 'buy' ? 4000000 : 12000),
+      filters.minRooms !== DEFAULT_FILTERS.minRooms,
+      filters.minBedrooms > 0,
+      filters.minBathrooms > 0,
+      filters.minArea > 0 || filters.maxArea < 500,
+      filters.amenities.length > 0,
+      filters.newOnly,
+      filters.query.trim().length > 0,
+      filters.includeKeywords.trim().length > 0,
+      filters.excludeKeywords.trim().length > 0,
+      filters.publishedWithinDays > 0,
+      filters.minFloor > 0 || filters.maxFloor > 0,
+      filters.energyRatings.length > 0,
+    ].filter(Boolean).length;
+  }
+
+  private summarizeActiveFilters(filters: Filter): string {
+    const labels = [
+      filters.city !== DEFAULT_FILTERS.city ? filters.city : '',
+      filters.propertyType !== DEFAULT_FILTERS.propertyType ? filters.propertyType : '',
+      filters.minRooms !== DEFAULT_FILTERS.minRooms ? `${filters.minRooms}+ pieces` : '',
+      filters.minBedrooms > 0 ? `${filters.minBedrooms}+ chambres` : '',
+      filters.amenities.length ? filters.amenities.join(', ') : '',
+      filters.energyRatings.length ? `DPE ${filters.energyRatings.join(', ')}` : '',
+    ].filter(Boolean);
+    return labels.slice(0, 2).join(' · ') || 'Criteres personnalises';
   }
 
   saveSearch(): void {

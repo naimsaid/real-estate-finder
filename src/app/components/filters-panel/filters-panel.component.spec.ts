@@ -102,4 +102,31 @@ describe('FiltersPanelComponent', () => {
 
     expect(emitted).toEqual([{ minFloor: 5 }, { maxFloor: 2 }, { energyRatings: ['B'] }]);
   });
+
+  it('resets each filter section independently', () => {
+    const emitted: Partial<Filter>[] = [];
+    component.filters = {
+      ...component.filters,
+      energyRatings: ['A'],
+      newOnly: true,
+      includeKeywords: 'terrasse',
+    };
+    component.filtersChange.subscribe((value) => emitted.push(value));
+
+    component.resetListingSection();
+    component.resetEnergySection();
+    component.resetAmenitiesSection();
+
+    expect(emitted).toEqual([
+      {
+        includeKeywords: '',
+        excludeKeywords: '',
+        publishedWithinDays: 0,
+        minFloor: 0,
+        maxFloor: 0,
+      },
+      { energyRatings: [], newOnly: false },
+      { amenities: [] },
+    ]);
+  });
 });

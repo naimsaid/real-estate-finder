@@ -182,4 +182,14 @@ describe('HomePage', () => {
     page.toggleComparison(2);
     expect(page.comparisonIds()).toEqual([1, 3]);
   });
+
+  it('counts active filter groups and exposes a compact summary', () => {
+    const page = TestBed.createComponent(HomePage).componentInstance;
+
+    expect(page.activeFilterCount()).toBe(0);
+    page.updateFilters({ city: 'Rabat', minBedrooms: 2, amenities: ['Jardin'] });
+
+    expect(page.activeFilterCount()).toBe(3);
+    expect(page.activeFilterSummary()).toContain('Rabat');
+  });
 });
