@@ -153,4 +153,30 @@ describe('ListingDetailPage gallery', () => {
     );
     expect(fixture.componentInstance.shareFeedback).toBe('Lien copié dans le presse-papiers.');
   });
+
+  it('publie les métadonnées sociales et le JSON-LD immobilier', () => {
+    const fixture = TestBed.createComponent(ListingDetailPage);
+    fixture.detectChanges();
+
+    expect(document.title).toContain('Appartement lumineux avec terrasse à Casablanca');
+    expect(document.querySelector('meta[name="description"]')?.getAttribute('content')).toContain(
+      '128 m², 4 pièces',
+    );
+    expect(document.querySelector('meta[property="og:image"]')?.getAttribute('content')).toContain(
+      'images.unsplash.com',
+    );
+
+    const script = document.querySelector<HTMLScriptElement>(
+      'script[data-listing-structured-data="true"]',
+    );
+    const structuredData = JSON.parse(script?.textContent ?? '{}') as Record<string, unknown>;
+    expect(structuredData['@type']).toBe('RealEstateListing');
+    expect(structuredData['offers']).toEqual(expect.objectContaining({ price: 2480000 }));
+    expect(structuredData['address']).toEqual(
+      expect.objectContaining({ addressLocality: 'Casablanca' }),
+    );
+
+    fixture.destroy();
+    expect(document.querySelector('script[data-listing-structured-data="true"]')).toBeNull();
+  });
 });

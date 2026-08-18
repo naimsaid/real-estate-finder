@@ -1,10 +1,12 @@
-import { Injectable, signal } from '@angular/core';
+import { Injectable, PLATFORM_ID, inject, signal } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 
 const FAVORITES_STORAGE_KEY = 'real-estate-finder:favorites';
 const DEFAULT_FAVORITE_IDS = [1, 5];
 
 @Injectable({ providedIn: 'root' })
 export class FavoriteService {
+  private readonly isBrowser = isPlatformBrowser(inject(PLATFORM_ID));
   private readonly favoriteIds = signal<number[]>(this.loadFavorites());
   readonly favorites = this.favoriteIds.asReadonly();
 
@@ -33,6 +35,7 @@ export class FavoriteService {
   }
 
   private loadFavorites(): number[] {
+    if (!this.isBrowser) return [...DEFAULT_FAVORITE_IDS];
     try {
       const storedFavorites = localStorage.getItem(FAVORITES_STORAGE_KEY);
       if (storedFavorites === null) return [...DEFAULT_FAVORITE_IDS];
@@ -51,6 +54,7 @@ export class FavoriteService {
   private updateFavorites(ids: number[]): void {
     this.favoriteIds.set(ids);
 
+    if (!this.isBrowser) return;
     try {
       localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(ids));
     } catch {

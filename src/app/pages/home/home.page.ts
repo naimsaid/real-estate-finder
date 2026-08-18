@@ -4,11 +4,13 @@ import {
   DestroyRef,
   ElementRef,
   HostListener,
+  PLATFORM_ID,
   ViewChild,
   computed,
   inject,
   signal,
 } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
@@ -315,6 +317,7 @@ export class HomePage {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly platformId = inject(PLATFORM_ID);
 
   readonly modes: SelectOption<ListingMode>[] = [
     { label: 'Acheter', value: 'buy' },
@@ -397,7 +400,9 @@ export class HomePage {
   );
 
   constructor() {
-    const mobileQuery = window.matchMedia?.('(max-width: 767px)');
+    const mobileQuery = isPlatformBrowser(this.platformId)
+      ? window.matchMedia?.('(max-width: 767px)')
+      : undefined;
     const updateViewport = (): void => {
       this.isMobile.set(mobileQuery?.matches ?? false);
       if (!mobileQuery?.matches) this.filtersOpen.set(false);
