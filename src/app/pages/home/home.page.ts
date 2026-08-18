@@ -12,6 +12,7 @@ import { AdviceSectionComponent } from '../../components/advice-section/advice-s
 import { FiltersPanelComponent } from '../../components/filters-panel/filters-panel.component';
 import { HeaderComponent } from '../../components/header/header.component';
 import { ListingGridComponent } from '../../components/listing-grid/listing-grid.component';
+import { ListingMapComponent } from '../../components/listing-map/listing-map.component';
 import { SearchPanelComponent } from '../../components/search-panel/search-panel.component';
 import { AmenityOption, EnergyRating, Filter, SelectOption, SortOption } from '../../models/filter';
 import { ListingMode, PropertyType } from '../../models/listing';
@@ -49,9 +50,11 @@ const DEFAULT_FILTERS: Filter = {
     FiltersPanelComponent,
     HeaderComponent,
     ListingGridComponent,
+    ListingMapComponent,
     SearchPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './home.page.scss',
   template: `
     <main class="app-shell">
       <app-header />
@@ -78,20 +81,45 @@ const DEFAULT_FILTERS: Filter = {
           [sortOptions]="sortOptions"
           (filtersChange)="updateFilters($event)"
           (resetFilters)="resetAdvancedFilters()"
-        /><app-listing-grid
-          [listings]="paginatedListings()"
-          [totalListings]="sortedListings().length"
-          [currentPage]="currentPage()"
-          [totalPages]="totalPages()"
-          [loading]="listings.isLoading()"
-          [error]="listings.error()"
-          [sortOptions]="sortOptions"
-          [sortBy]="filters().sortBy"
-          [favoriteIds]="favorites.favorites()"
-          (sortChange)="updateFilters({ sortBy: $event })"
-          (pageChange)="changePage($event)"
-          (favoriteToggle)="favorites.toggleFavorite($event)"
         />
+        <div class="results-column">
+          <div class="view-toggle" role="group" aria-label="Mode d’affichage">
+            <button
+              type="button"
+              [class.active]="viewMode() === 'list'"
+              [attr.aria-pressed]="viewMode() === 'list'"
+              (click)="viewMode.set('list')"
+            >
+              Liste
+            </button>
+            <button
+              type="button"
+              [class.active]="viewMode() === 'map'"
+              [attr.aria-pressed]="viewMode() === 'map'"
+              (click)="viewMode.set('map')"
+            >
+              Carte
+            </button>
+          </div>
+          @if (viewMode() === 'list') {
+            <app-listing-grid
+              [listings]="paginatedListings()"
+              [totalListings]="sortedListings().length"
+              [currentPage]="currentPage()"
+              [totalPages]="totalPages()"
+              [loading]="listings.isLoading()"
+              [error]="listings.error()"
+              [sortOptions]="sortOptions"
+              [sortBy]="filters().sortBy"
+              [favoriteIds]="favorites.favorites()"
+              (sortChange)="updateFilters({ sortBy: $event })"
+              (pageChange)="changePage($event)"
+              (favoriteToggle)="favorites.toggleFavorite($event)"
+            />
+          } @else {
+            <app-listing-map [listings]="sortedListings()" />
+          }
+        </div>
       </section>
       <app-advice-section [advice]="advice" />
     </main>
@@ -139,6 +167,7 @@ export class HomePage {
   readonly advice = this.adviceService.getAdvice();
   readonly filters = signal<Filter>(this.filtersFromParams(this.route.snapshot.queryParamMap));
   readonly currentPage = signal(1);
+  readonly viewMode = signal<'list' | 'map'>('list');
   readonly filteredListings = this.listings.search(this.filters);
   readonly sortedListings = this.filteredListings;
   readonly totalPages = computed(() =>

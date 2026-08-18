@@ -1,0 +1,236 @@
+import { CurrencyPipe, isPlatformBrowser } from '@angular/common';
+import {
+  AfterViewInit,
+  ChangeDetectionStrategy,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  Input,
+  OnChanges,
+  OnDestroy,
+  PLATFORM_ID,
+  SimpleChanges,
+  ViewChild,
+  ViewEncapsulation,
+  inject,
+} from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { Listing } from '../../models/listing';
+
+interface LeafletLayer {
+  addTo(map: LeafletMap): LeafletLayer;
+  bindTooltip?(content: string, options?: object): LeafletLayer;
+  on?(event: string, callback: () => void): LeafletLayer;
+  remove?(): void;
+}
+
+interface LeafletMap {
+  fitBounds(bounds: [number, number][], options?: object): void;
+  invalidateSize(): void;
+  remove(): void;
+  setView(center: [number, number], zoom: number): void;
+}
+
+interface LeafletApi {
+  map(element: HTMLElement, options?: object): LeafletMap;
+  tileLayer(url: string, options?: object): LeafletLayer;
+  marker(position: [number, number], options?: object): LeafletLayer;
+  circle(position: [number, number], options?: object): LeafletLayer;
+  divIcon(options: object): object;
+}
+
+declare global {
+  interface Window {
+    L?: LeafletApi;
+  }
+}
+
+@Component({
+  selector: 'app-listing-map',
+  imports: [CurrencyPipe, RouterLink],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './listing-map.component.scss',
+  encapsulation: ViewEncapsulation.None,
+  template: `
+    <section class="map-results" aria-label="Carte des annonces">
+      <div class="map-actions">
+        <p>{{ listings.length }} annonces affichées sur la carte</p>
+        <button type="button" class="location-button" [disabled]="locating" (click)="locateUser()">
+          {{ locating ? 'Localisation…' : 'Autour de moi' }}
+        </button>
+      </div>
+      @if (locationMessage) {
+        <p class="location-message" role="status">{{ locationMessage }}</p>
+      }
+      <div
+        #mapContainer
+        class="listings-map"
+        [attr.aria-busy]="mapLoading"
+        aria-label="Emplacement des annonces"
+      ></div>
+      @if (mapLoading) {
+        <div class="map-loading" role="status">Chargement de la carte…</div>
+      }
+      @if (mapError) {
+        <div class="empty-state error-state" role="alert">{{ mapError }}</div>
+      }
+      @if (selectedListing; as listing) {
+        <article class="map-preview" aria-live="polite">
+          <img [src]="listing.image" [alt]="'Photo de ' + listing.title" />
+          <div>
+            <p>{{ listing.type }} · {{ listing.city }}, {{ listing.district }}</p>
+            <h3>{{ listing.title }}</h3>
+            <strong>{{
+              listing.price
+                | currency: (listing.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
+            }}</strong>
+            <span>{{ listing.area }} m² · {{ listing.rooms }} pièces</span>
+            <a class="detail-link" [routerLink]="['/annonces', listing.id]">Voir l’annonce</a>
+          </div>
+          <button
+            type="button"
+            class="preview-close"
+            aria-label="Fermer l’aperçu"
+            (click)="selectedListing = undefined"
+          >
+            ×
+          </button>
+        </article>
+      }
+    </section>
+  `,
+})
+export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy {
+  private static leafletPromise?: Promise<LeafletApi>;
+  private readonly platformId = inject(PLATFORM_ID);
+  private readonly changeDetector = inject(ChangeDetectorRef);
+  private map?: LeafletMap;
+  private markers: LeafletLayer[] = [];
+  private userLayers: LeafletLayer[] = [];
+
+  @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLElement>;
+  @Input({ required: true }) listings: readonly Listing[] = [];
+  selectedListing?: Listing;
+  mapLoading = true;
+  mapError = '';
+  locating = false;
+  locationMessage = '';
+
+  async ngAfterViewInit(): Promise<void> {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      const leaflet = await this.loadLeaflet();
+      if (!this.mapContainer) return;
+      this.map = leaflet.map(this.mapContainer.nativeElement, { zoomControl: true });
+      leaflet
+        .tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors',
+          maxZoom: 19,
+        })
+        .addTo(this.map);
+      this.mapLoading = false;
+      this.renderMarkers(leaflet);
+      queueMicrotask(() => this.map?.invalidateSize());
+    } catch {
+      this.mapLoading = false;
+      this.mapError = 'Impossible de charger la carte pour le moment.';
+    }
+    this.changeDetector.markForCheck();
+  }
+
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['listings'] && this.map && window.L) this.renderMarkers(window.L);
+  }
+
+  ngOnDestroy(): void {
+    this.map?.remove();
+  }
+
+  locateUser(): void {
+    if (!navigator.geolocation || !this.map || !window.L) {
+      this.locationMessage = 'La géolocalisation n’est pas disponible sur cet appareil.';
+      return;
+    }
+    this.locating = true;
+    this.locationMessage = '';
+    navigator.geolocation.getCurrentPosition(
+      ({ coords }) => {
+        const position: [number, number] = [coords.latitude, coords.longitude];
+        this.userLayers.forEach((layer) => layer.remove?.());
+        this.userLayers = [
+          window
+            .L!.circle(position, {
+              radius: Math.max(coords.accuracy, 100),
+              color: '#285ee8',
+            })
+            .addTo(this.map!),
+          window.L!.marker(position).addTo(this.map!),
+        ];
+        this.map!.setView(position, 13);
+        this.locating = false;
+        this.locationMessage = 'La carte est centrée sur votre position.';
+        this.changeDetector.markForCheck();
+      },
+      () => {
+        this.locating = false;
+        this.locationMessage = 'Votre position n’a pas pu être récupérée.';
+        this.changeDetector.markForCheck();
+      },
+      { enableHighAccuracy: true, timeout: 10000 },
+    );
+  }
+
+  private renderMarkers(leaflet: LeafletApi): void {
+    if (!this.map) return;
+    this.markers.forEach((marker) => marker.remove?.());
+    this.markers = this.listings.map((listing) => {
+      const marker = leaflet.marker([listing.latitude, listing.longitude], {
+        icon: leaflet.divIcon({
+          className: 'price-marker-shell',
+          html: `<span class="price-marker">${this.shortPrice(listing.price)}</span>`,
+          iconSize: [72, 34],
+          iconAnchor: [36, 34],
+        }),
+      });
+      marker.bindTooltip?.(listing.title, { direction: 'top', offset: [0, -28] });
+      marker.on?.('click', () => {
+        this.selectedListing = listing;
+        this.changeDetector.markForCheck();
+      });
+      marker.addTo(this.map!);
+      return marker;
+    });
+    const bounds = this.listings.map(
+      ({ latitude, longitude }) => [latitude, longitude] as [number, number],
+    );
+    if (bounds.length) this.map.fitBounds(bounds, { padding: [45, 45], maxZoom: 13 });
+    else this.map.setView([33.6, -7.6], 5);
+  }
+
+  private shortPrice(price: number): string {
+    return price >= 1_000_000
+      ? `${(price / 1_000_000).toLocaleString('fr-FR', { maximumFractionDigits: 1 })} M`
+      : price >= 1_000
+        ? `${Math.round(price / 1_000)} k`
+        : String(price);
+  }
+
+  private loadLeaflet(): Promise<LeafletApi> {
+    if (window.L) return Promise.resolve(window.L);
+    if (ListingMapComponent.leafletPromise) return ListingMapComponent.leafletPromise;
+    ListingMapComponent.leafletPromise = new Promise((resolve, reject) => {
+      const stylesheet = document.createElement('link');
+      stylesheet.rel = 'stylesheet';
+      stylesheet.href = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';
+      document.head.appendChild(stylesheet);
+      const script = document.createElement('script');
+      script.src = 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';
+      script.integrity = 'sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=';
+      script.crossOrigin = '';
+      script.onload = () => (window.L ? resolve(window.L) : reject());
+      script.onerror = () => reject();
+      document.head.appendChild(script);
+    });
+    return ListingMapComponent.leafletPromise;
+  }
+}

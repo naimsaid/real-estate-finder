@@ -31,6 +31,8 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
     floor: 3,
     energyRating: 'B',
+    latitude: 33.5921,
+    longitude: -7.6642,
   },
   {
     id: 2,
@@ -62,6 +64,8 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
     floor: 0,
     energyRating: 'D',
+    latitude: 33.9547,
+    longitude: -6.8357,
   },
   {
     id: 3,
@@ -93,6 +97,8 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
     floor: 5,
     energyRating: 'C',
+    latitude: 48.8532,
+    longitude: 2.3692,
   },
   {
     id: 4,
@@ -123,6 +129,8 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     score: 90,
     publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
     floor: 0,
+    latitude: 31.5386,
+    longitude: -7.9417,
   },
   {
     id: 5,
@@ -154,6 +162,8 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
     floor: 7,
     energyRating: 'A',
+    latitude: 35.7767,
+    longitude: -5.7998,
   },
   {
     id: 6,
@@ -185,5 +195,7 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
     floor: 2,
     energyRating: 'C',
+    latitude: 30.3975,
+    longitude: -9.5721,
   },
 ];

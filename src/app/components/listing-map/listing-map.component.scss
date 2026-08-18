@@ -1,0 +1,127 @@
+.map-results {
+  position: relative;
+}
+
+.map-actions {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+
+  p {
+    color: var(--muted);
+    font-weight: 800;
+    margin: 0;
+  }
+}
+
+.location-button {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--accent);
+  font-weight: 900;
+  padding: 10px 14px;
+}
+
+.location-message {
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.listings-map,
+.map-loading {
+  background: #e8eef7;
+  border-radius: 8px;
+  min-height: 620px;
+  overflow: hidden;
+}
+
+.map-loading {
+  display: grid;
+  inset: 52px 0 0;
+  place-items: center;
+  position: absolute;
+}
+
+.price-marker-shell {
+  background: transparent;
+  border: 0;
+}
+
+.price-marker {
+  background: var(--accent);
+  border: 2px solid #ffffff;
+  border-radius: 999px;
+  box-shadow: 0 5px 15px rgba(23, 32, 51, 0.3);
+  color: #ffffff;
+  display: block;
+  font-size: 0.78rem;
+  font-weight: 900;
+  padding: 7px 8px;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.map-preview {
+  background: #ffffff;
+  border-radius: 8px;
+  bottom: 22px;
+  box-shadow: 0 18px 50px rgba(23, 32, 51, 0.22);
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  left: 22px;
+  max-width: 540px;
+  overflow: hidden;
+  padding: 12px;
+  position: absolute;
+  right: 22px;
+  z-index: 500;
+
+  img {
+    border-radius: 6px;
+    height: 120px;
+    object-fit: cover;
+    width: 150px;
+  }
+
+  div {
+    display: grid;
+    gap: 5px;
+  }
+
+  h3,
+  p {
+    margin: 0;
+  }
+
+  p,
+  span {
+    color: var(--muted);
+    font-size: 0.82rem;
+  }
+}
+
+.preview-close {
+  background: transparent;
+  border: 0;
+  font-size: 1.5rem;
+  height: 32px;
+}
+
+@media (max-width: 760px) {
+  .listings-map,
+  .map-loading {
+    min-height: 500px;
+  }
+
+  .map-preview {
+    grid-template-columns: 92px minmax(0, 1fr) auto;
+
+    img {
+      height: 92px;
+      width: 92px;
+    }
+  }
+}
