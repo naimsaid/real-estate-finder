@@ -1,3 +1,4 @@
+import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { Filter } from '../models/filter';
 import { Listing } from '../models/listing';
@@ -95,6 +96,32 @@ describe('ListingService', () => {
   it('gets a listing by id through the repository', () => {
     expect(service.getListingById(2)).toEqual(listings[1]);
     expect(service.getListingById(99)).toBeUndefined();
+  });
+
+  it('exposes a computed search that reacts to filter changes', () => {
+    const filters = signal<Filter>({
+      mode: 'buy',
+      city: 'Toutes les villes',
+      propertyType: 'Tous',
+      maxBudget: 3000000,
+      minRooms: 1,
+      minBedrooms: 0,
+      minBathrooms: 0,
+      minArea: 0,
+      maxArea: 500,
+      amenities: [],
+      newOnly: false,
+      sortBy: 'priceDesc',
+      query: '',
+    });
+    const results = service.search(filters);
+
+    expect(results().map(({ id }) => id)).toEqual([2, 1]);
+
+    filters.update((value) => ({ ...value, city: 'Rabat' }));
+
+    expect(results().map(({ id }) => id)).toEqual([1]);
+    expect('set' in results).toBe(false);
   });
 
   it('filters and sorts listings without changing repository data', () => {
