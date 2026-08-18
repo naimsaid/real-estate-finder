@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { HeaderComponent } from '../../components/header/header.component';
+import { PROPERTY_TYPES, PropertyType } from '../../models/listing';
 
 @Component({
   selector: 'app-publish-page',
@@ -36,9 +37,9 @@ import { HeaderComponent } from '../../components/header/header.component';
               <span>Type de bien *</span>
               <select formControlName="type">
                 <option value="">Sélectionnez un type</option>
-                <option value="Appartement">Appartement</option>
-                <option value="Maison">Maison</option>
-                <option value="Terrain">Terrain</option>
+                @for (propertyType of propertyTypes; track propertyType) {
+                  <option [value]="propertyType">{{ propertyType }}</option>
+                }
               </select>
               @if (invalid('type')) {
                 <small class="field-error">Le type de bien est obligatoire.</small>
@@ -75,9 +76,17 @@ import { HeaderComponent } from '../../components/header/header.component';
 export class PublishPage {
   private readonly formBuilder = inject(FormBuilder);
   readonly sent = signal(false);
+  readonly propertyTypes = PROPERTY_TYPES;
   readonly form = this.formBuilder.nonNullable.group({
     title: ['', Validators.required],
-    type: ['', Validators.required],
+    type: [
+      '' as PropertyType | '',
+      [
+        Validators.required,
+        (control: AbstractControl<PropertyType | ''>) =>
+          PROPERTY_TYPES.includes(control.value as PropertyType) ? null : { propertyType: true },
+      ],
+    ],
     city: ['', Validators.required],
     price: [0, [Validators.required, Validators.min(1)]],
     email: ['', [Validators.required, Validators.email]],

@@ -1,11 +1,11 @@
-import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Listing } from '../../models/listing';
+import { formatPrice, formatSurface } from '../../utils/listing-format';
 
 @Component({
   selector: 'app-listing-card',
-  imports: [CurrencyPipe, RouterLink],
+  imports: [RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <article class="property-card">
@@ -42,10 +42,7 @@ import { Listing } from '../../models/listing';
           <span>Comparer</span>
         </label>
         <div class="price-row">
-          <strong>{{
-            listing.price | currency: (listing.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
-          }}</strong
-          ><span>{{ listing.mode === 'rent' ? '/ mois' : '' }}</span>
+          <strong>{{ formatPrice(listing.price, listing.mode) }}</strong>
         </div>
         <h3>
           <a
@@ -59,7 +56,7 @@ import { Listing } from '../../models/listing';
         <dl class="features">
           <div>
             <dt>Surface</dt>
-            <dd>{{ listing.area }} m2</dd>
+            <dd>{{ formatSurface(listing.area) }}</dd>
           </div>
           <div>
             <dt>Pieces</dt>
@@ -88,6 +85,8 @@ import { Listing } from '../../models/listing';
   `,
 })
 export class ListingCardComponent {
+  readonly formatPrice = formatPrice;
+  readonly formatSurface = formatSurface;
   private readonly fallbackImage = '/assets/fallback-property.jpg';
   @Input({ required: true }) listing!: Listing;
   @Input() favorite = false;

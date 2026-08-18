@@ -49,6 +49,30 @@ describe('ListingDetailPage gallery', () => {
     expect(fixture.componentInstance.lightboxOpen).toBe(false);
   });
 
+  it('piège le focus dans la lightbox puis le restitue au déclencheur', async () => {
+    const fixture = TestBed.createComponent(ListingDetailPage);
+    fixture.detectChanges();
+    const page = fixture.nativeElement as HTMLElement;
+    const trigger = page.querySelector<HTMLButtonElement>('.gallery-item')!;
+
+    trigger.click();
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const controls = page.querySelectorAll<HTMLButtonElement>('.lightbox button');
+    expect(document.activeElement).toBe(controls[0]);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey: true }));
+    expect(document.activeElement).toBe(controls[controls.length - 1]);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab' }));
+    expect(document.activeElement).toBe(controls[0]);
+
+    document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }));
+    fixture.detectChanges();
+    expect(document.activeElement).toBe(trigger);
+  });
+
   it('remplace une image indisponible par le fallback local', () => {
     const fixture = TestBed.createComponent(ListingDetailPage);
     const image = document.createElement('img');

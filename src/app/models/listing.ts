@@ -1,6 +1,7 @@
 export type ListingMode = 'buy' | 'rent';
 
-export type PropertyType = 'Appartement' | 'Maison' | 'Villa' | 'Studio' | 'Loft';
+export const PROPERTY_TYPES = ['Appartement', 'Maison', 'Villa', 'Studio', 'Loft'] as const;
+export type PropertyType = (typeof PROPERTY_TYPES)[number];
 
 export interface Listing {
   id: number;

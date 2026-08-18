@@ -1,13 +1,13 @@
-import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideDynamicIcon } from '@lucide/angular';
 import { AmenityOption, EnergyRating, Filter, SelectOption, SortOption } from '../../models/filter';
 import { PropertyType } from '../../models/listing';
+import { formatPrice, formatSurface } from '../../utils/listing-format';
 
 @Component({
   selector: 'app-filters-panel',
-  imports: [CurrencyPipe, FormsModule, LucideDynamicIcon],
+  imports: [FormsModule, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside class="filters-panel" aria-label="Filtres avances">
@@ -17,10 +17,7 @@ import { PropertyType } from '../../models/listing';
           <label class="range-field compact-range"
             ><span class="field-label"
               ><span class="criteria-icon"><svg lucideIcon="house"></svg></span>Budget maximum</span
-            ><strong>{{
-              filters.maxBudget
-                | currency: (filters.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
-            }}</strong
+            ><strong>{{ formatPrice(filters.maxBudget, filters.mode) }}</strong
             ><input
               type="range"
               [min]="budgetMin"
@@ -83,8 +80,8 @@ import { PropertyType } from '../../models/listing';
             <span class="field-label"
               ><span class="criteria-icon"><svg lucideIcon="ruler"></svg></span>Surface</span
             ><strong id="area-range-value"
-              >{{ filters.minArea }} m2 -
-              {{ filters.maxArea === 500 ? 'Illimitee' : filters.maxArea + ' m2' }}</strong
+              >{{ formatSurface(filters.minArea) }} -
+              {{ filters.maxArea === 500 ? 'Illimitee' : formatSurface(filters.maxArea) }}</strong
             >
             <div
               class="dual-range"
@@ -225,6 +222,8 @@ import { PropertyType } from '../../models/listing';
   `,
 })
 export class FiltersPanelComponent {
+  readonly formatPrice = formatPrice;
+  readonly formatSurface = formatSurface;
   readonly energyRatingOptions: EnergyRating[] = ['A', 'B', 'C', 'D', 'E', 'F', 'G'];
   @Input({ required: true }) filters!: Filter;
   @Input({ required: true }) propertyTypes!: PropertyType[];
