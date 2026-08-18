@@ -1,0 +1,114 @@
+.saved-searches-page {
+  max-width: 1040px;
+}
+.saved-searches-page > h1 {
+  margin-bottom: 12px;
+}
+.saved-searches-intro,
+.saved-search-date,
+.empty-searches p {
+  color: var(--muted);
+}
+.saved-searches-list {
+  display: grid;
+  gap: 20px;
+  margin-top: 36px;
+}
+.saved-search-card,
+.empty-searches {
+  background: var(--card);
+  border: 1px solid rgba(25, 58, 95, 0.08);
+  border-radius: 10px;
+  box-shadow: 0 20px 55px rgba(23, 32, 51, 0.07);
+  padding: clamp(22px, 4vw, 34px);
+}
+.empty-searches {
+  margin-top: 36px;
+}
+.saved-search-heading,
+.saved-search-actions {
+  align-items: start;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+}
+.saved-search-heading h2,
+.saved-search-heading p {
+  margin: 0;
+}
+.saved-search-mode {
+  color: var(--accent);
+  font-size: 0.78rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.saved-search-heading h2 {
+  margin-top: 7px;
+}
+.saved-search-date {
+  font-size: 0.85rem;
+  margin-top: 8px !important;
+}
+.delete-search {
+  background: transparent;
+  border: 0;
+  color: #b42318;
+  font-weight: 800;
+}
+.criteria-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  margin: 24px 0;
+  padding: 0;
+  li {
+    background: var(--soft);
+    border: 1px solid var(--line);
+    border-radius: 999px;
+    color: var(--muted);
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 7px 11px;
+  }
+}
+.saved-search-actions {
+  align-items: end;
+}
+.alert-form {
+  display: grid;
+  gap: 6px;
+  max-width: 440px;
+  width: 100%;
+  label,
+  small {
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  div {
+    display: flex;
+  }
+  input {
+    border: 1px solid var(--line);
+    border-radius: 8px 0 0 8px;
+    min-width: 0;
+    padding: 10px 12px;
+    width: 100%;
+  }
+  button {
+    background: var(--accent);
+    border: 0;
+    border-radius: 0 8px 8px 0;
+    color: #fff;
+    font-weight: 900;
+    padding: 10px 16px;
+  }
+}
+@media (max-width: 700px) {
+  .saved-search-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}

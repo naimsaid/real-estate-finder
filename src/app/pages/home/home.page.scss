@@ -11,6 +11,18 @@
   padding: 4px;
   width: max-content;
 
+  .save-search-button {
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    margin-right: 8px;
+  }
+
+  .save-search-button.saved {
+    background: #e8f0ff;
+    color: var(--accent-strong);
+    cursor: default;
+  }
+
   button {
     background: transparent;
     border: 0;
