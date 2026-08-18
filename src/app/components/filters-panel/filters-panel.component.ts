@@ -103,6 +103,8 @@ import { PropertyType } from '../../models/listing';
                 [ngModel]="filters.minArea"
                 (ngModelChange)="setMinArea(+$event)"
                 aria-label="Surface minimum en metres carres"
+                [attr.aria-valuemax]="filters.maxArea - 10"
+                [attr.aria-valuetext]="filters.minArea + ' metres carres minimum'"
               /><input
                 type="range"
                 min="0"
@@ -111,6 +113,12 @@ import { PropertyType } from '../../models/listing';
                 [ngModel]="filters.maxArea"
                 (ngModelChange)="setMaxArea(+$event)"
                 aria-label="Surface maximum en metres carres"
+                [attr.aria-valuemin]="filters.minArea + 10"
+                [attr.aria-valuetext]="
+                  filters.maxArea === 500
+                    ? 'Surface maximum illimitee'
+                    : filters.maxArea + ' metres carres maximum'
+                "
               />
             </div>
           </div>
