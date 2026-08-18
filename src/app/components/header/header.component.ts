@@ -17,7 +17,8 @@ import { FavoriteService } from '../../services/favorite.service';
           <span class="favorites-count" aria-label="Nombre de favoris">{{
             favoriteCount()
           }}</span></a
-        ><a href="#conseils">Conseils</a>
+        ><a href="#conseils">Conseils</a
+        ><a routerLink="/compte/recherches" routerLinkActive="active">Mes recherches</a>
       </div>
       <a class="ghost-button" routerLink="/publier">Publier une annonce</a>
     </nav>

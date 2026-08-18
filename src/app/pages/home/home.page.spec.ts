@@ -149,4 +149,17 @@ describe('HomePage', () => {
       energyRatings: ['C'],
     });
   });
+
+  it('saves the current search criteria', () => {
+    const page = TestBed.createComponent(HomePage).componentInstance;
+    page.updateFilters({ city: 'Rabat', minRooms: 3 });
+
+    page.saveSearch();
+
+    expect(page.savedSearches.savedSearches()).toHaveLength(1);
+    expect(page.savedSearches.savedSearches()[0].filters).toMatchObject({
+      city: 'Rabat',
+      minRooms: 3,
+    });
+  });
 });

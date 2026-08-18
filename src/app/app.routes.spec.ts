@@ -6,6 +6,7 @@ import { routes } from './app.routes';
 import { FavoritesPage } from './pages/favorites/favorites.page';
 import { HomePage } from './pages/home/home.page';
 import { ListingDetailPage } from './pages/listing-detail/listing-detail.page';
+import { SavedSearchesPage } from './pages/saved-searches/saved-searches.page';
 
 describe('application routes', () => {
   let router: Router;
@@ -58,11 +59,21 @@ describe('application routes', () => {
     expect(router.url).toBe('/');
   });
 
+  it('affiche les recherches sauvegardées sur /compte/recherches', async () => {
+    const page = await navigateTo('/compte/recherches');
+
+    expect(page.querySelector('app-saved-searches-page')).not.toBeNull();
+    expect(page.textContent).toContain('Mes recherches sauvegardées');
+  });
+
   it('associe les routes aux pages attendues', () => {
     expect(routes.find((route) => route.path === '')?.component).toBe(HomePage);
     expect(routes.find((route) => route.path === 'annonces/:id')?.component).toBe(
       ListingDetailPage,
     );
     expect(routes.find((route) => route.path === 'favoris')?.component).toBe(FavoritesPage);
+    expect(routes.find((route) => route.path === 'compte/recherches')?.component).toBe(
+      SavedSearchesPage,
+    );
   });
 });

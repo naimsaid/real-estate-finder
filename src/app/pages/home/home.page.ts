@@ -19,6 +19,7 @@ import { ListingMode, PropertyType } from '../../models/listing';
 import { AdviceService } from '../../services/advice.service';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
+import { SavedSearchService } from '../../services/saved-search.service';
 
 const PAGE_SIZE = 12;
 const DEFAULT_FILTERS: Filter = {
@@ -85,6 +86,19 @@ const DEFAULT_FILTERS: Filter = {
         <div class="results-column">
           <div class="view-toggle" role="group" aria-label="Mode d’affichage">
             <button
+              class="save-search-button"
+              type="button"
+              [class.saved]="savedSearches.isSaved(filters())"
+              [disabled]="savedSearches.isSaved(filters())"
+              (click)="saveSearch()"
+            >
+              {{
+                savedSearches.isSaved(filters())
+                  ? 'Recherche enregistrée'
+                  : 'Enregistrer cette recherche'
+              }}
+            </button>
+            <button
               type="button"
               [class.active]="viewMode() === 'list'"
               [attr.aria-pressed]="viewMode() === 'list'"
@@ -128,6 +142,7 @@ const DEFAULT_FILTERS: Filter = {
 export class HomePage {
   readonly listings = inject(ListingService);
   readonly favorites = inject(FavoriteService);
+  readonly savedSearches = inject(SavedSearchService);
   private readonly adviceService = inject(AdviceService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -219,6 +234,10 @@ export class HomePage {
       maxFloor: 0,
       energyRatings: [],
     });
+  }
+
+  saveSearch(): void {
+    this.savedSearches.save(this.filters());
   }
 
   private filtersFromParams(params: ParamMap): Filter {
