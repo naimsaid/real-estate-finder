@@ -26,4 +26,6 @@ export interface Listing {
   publishedAt?: string;
   floor?: number;
   energyRating?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
+  latitude: number;
+  longitude: number;
 }

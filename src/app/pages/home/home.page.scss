@@ -1,0 +1,27 @@
+.results-column {
+  min-width: 0;
+}
+
+.view-toggle {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  display: flex;
+  margin: 0 0 18px auto;
+  padding: 4px;
+  width: max-content;
+
+  button {
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    color: var(--muted);
+    font-weight: 900;
+    padding: 9px 20px;
+  }
+
+  button.active {
+    background: var(--accent);
+    color: #ffffff;
+  }
+}

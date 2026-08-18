@@ -31,6 +31,8 @@ describe('ListingService', () => {
       publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
       floor: 2,
       energyRating: 'B',
+      latitude: 34.0209,
+      longitude: -6.8416,
     },
     {
       id: 2,
@@ -56,6 +58,8 @@ describe('ListingService', () => {
       publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
       floor: 0,
       energyRating: 'E',
+      latitude: 33.5921,
+      longitude: -7.6642,
     },
     {
       id: 3,
@@ -81,6 +85,8 @@ describe('ListingService', () => {
       publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
       floor: 5,
       energyRating: 'C',
+      latitude: 34.0237,
+      longitude: -6.829,
     },
   ];
   const repository: ListingRepository = {
