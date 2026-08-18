@@ -16,8 +16,7 @@ import { PropertyType } from '../../models/listing';
         <div class="advanced-grid">
           <label class="range-field compact-range"
             ><span class="field-label"
-              ><svg class="criteria-icon" lucideIcon="house" aria-hidden="true"></svg>Budget
-              maximum</span
+              ><span class="criteria-icon"><svg lucideIcon="house"></svg></span>Budget maximum</span
             ><strong>{{
               filters.maxBudget
                 | currency: (filters.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
@@ -32,7 +31,7 @@ import { PropertyType } from '../../models/listing';
           /></label>
           <div class="filter-group">
             <span class="field-label"
-              ><svg class="criteria-icon" lucideIcon="building-2" aria-hidden="true"></svg>Types
+              ><span class="criteria-icon"><svg lucideIcon="building-2"></svg></span>Types
               populaires</span
             >
             <div class="chip-list">
@@ -56,7 +55,7 @@ import { PropertyType } from '../../models/listing';
           </div>
           <label
             ><span class="field-label"
-              ><svg class="criteria-icon" lucideIcon="bed-double" aria-hidden="true"></svg>Chambres
+              ><span class="criteria-icon"><svg lucideIcon="bed-double"></svg></span>Chambres
               min.</span
             ><select
               [ngModel]="filters.minBedrooms"
@@ -69,7 +68,7 @@ import { PropertyType } from '../../models/listing';
           >
           <label
             ><span class="field-label"
-              ><svg class="criteria-icon" lucideIcon="bath" aria-hidden="true"></svg>Salles de bain
+              ><span class="criteria-icon"><svg lucideIcon="bath"></svg></span>Salles de bain
               min.</span
             ><select
               [ngModel]="filters.minBathrooms"
@@ -82,7 +81,7 @@ import { PropertyType } from '../../models/listing';
           >
           <div class="range-field compact-range area-range">
             <span class="field-label"
-              ><svg class="criteria-icon" lucideIcon="ruler" aria-hidden="true"></svg>Surface</span
+              ><span class="criteria-icon"><svg lucideIcon="ruler"></svg></span>Surface</span
             ><strong id="area-range-value"
               >{{ filters.minArea }} m2 -
               {{ filters.maxArea === 500 ? 'Illimitee' : filters.maxArea + ' m2' }}</strong
@@ -124,7 +123,7 @@ import { PropertyType } from '../../models/listing';
           </div>
           <label
             ><span class="field-label"
-              ><svg class="criteria-icon" lucideIcon="arrow-up-down" aria-hidden="true"></svg>Trier
+              ><span class="criteria-icon"><svg lucideIcon="arrow-up-down"></svg></span>Trier
               par</span
             ><select [ngModel]="filters.sortBy" (ngModelChange)="patch({ sortBy: $event })">
               @for (option of sortOptions; track option.value) {
@@ -199,7 +198,7 @@ import { PropertyType } from '../../models/listing';
             [checked]="filters.newOnly"
             (change)="onNewOnlyChange($event)"
           /><span
-            ><svg class="criteria-icon" lucideIcon="sparkles" aria-hidden="true"></svg>Nouvelles annonces
+            ><span class="criteria-icon"><svg lucideIcon="sparkles"></svg></span>Nouvelles annonces
             uniquement</span
           ></label
         >
@@ -212,9 +211,8 @@ import { PropertyType } from '../../models/listing';
                 [class.selected]="filters.amenities.includes(amenity.label)"
                 (click)="toggleAmenity(amenity.label)"
               >
-                <svg class="criteria-icon" [lucideIcon]="amenity.icon" aria-hidden="true"></svg>{{
-                  amenity.label
-                }}
+                <span class="criteria-icon"><svg [lucideIcon]="amenity.icon"></svg></span
+                >{{ amenity.label }}
               </button>
             }
           </div>
