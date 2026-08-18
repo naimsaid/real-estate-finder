@@ -1,19 +1,19 @@
 import { inject, Injectable, signal } from '@angular/core';
-import { ListingFilters } from '../models/filter';
-import { PropertyListing } from '../models/listing';
+import { Filter } from '../models/filter';
+import { Listing } from '../models/listing';
 import { LISTING_REPOSITORY } from '../repositories/listing.repository';
 
-export type ListingCriteria = Omit<ListingFilters, 'sortBy'>;
+export type ListingCriteria = Omit<Filter, 'sortBy'>;
 
 @Injectable({ providedIn: 'root' })
 export class ListingService {
   private readonly repository = inject(LISTING_REPOSITORY);
-  private readonly listingState = signal<readonly PropertyListing[]>([]);
+  private readonly listingState = signal<readonly Listing[]>([]);
 
   readonly listings = this.listingState.asReadonly();
   readonly isLoading = signal(true);
   readonly error = signal<string | null>(null);
-  private readonly searchableText = new WeakMap<PropertyListing, string>();
+  private readonly searchableText = new WeakMap<Listing, string>();
 
   constructor() {
     try {
@@ -25,18 +25,18 @@ export class ListingService {
     }
   }
 
-  getListingById(id: number): PropertyListing | undefined {
+  getListingById(id: number): Listing | undefined {
     return this.repository.getListingById(id);
   }
 
-  filter(listings: readonly PropertyListing[], filters: ListingFilters): PropertyListing[] {
+  filter(listings: readonly Listing[], filters: Filter): Listing[] {
     return this.sort(this.filterMatches(listings, filters), filters.sortBy);
   }
 
   filterMatches(
-    listings: readonly PropertyListing[],
+    listings: readonly Listing[],
     filters: ListingCriteria,
-  ): PropertyListing[] {
+  ): Listing[] {
     const query = filters.query.trim().toLowerCase();
 
     return listings.filter((listing) => {
@@ -70,9 +70,9 @@ export class ListingService {
   }
 
   sort(
-    listings: readonly PropertyListing[],
-    sortBy: ListingFilters['sortBy'],
-  ): PropertyListing[] {
+    listings: readonly Listing[],
+    sortBy: Filter['sortBy'],
+  ): Listing[] {
     return [...listings].sort((a, b) =>
       sortBy === 'priceAsc'
         ? a.price - b.price

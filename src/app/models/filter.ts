@@ -2,7 +2,7 @@ import { ListingMode, PropertyType } from './listing';
 
 export type SortOption = 'relevance' | 'priceAsc' | 'priceDesc';
 
-export interface ListingFilters {
+export interface Filter {
   mode: ListingMode;
   city: string;
   propertyType: PropertyType | 'Tous';

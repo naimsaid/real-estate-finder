@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import { ListingFilters } from '../models/filter';
-import { PropertyListing } from '../models/listing';
+import { Filter } from '../models/filter';
+import { Listing } from '../models/listing';
 import { LISTING_REPOSITORY, ListingRepository } from '../repositories/listing.repository';
 import { ListingService } from './listing.service';
 
 describe('ListingService', () => {
-  const listings: PropertyListing[] = [
+  const listings: Listing[] = [
     {
       id: 1,
       title: 'Appartement test',
@@ -19,7 +19,11 @@ describe('ListingService', () => {
       bedrooms: 2,
       bathrooms: 1,
       image: 'test.jpg',
+      images: ['test.jpg'],
       tags: ['Balcon'],
+      description: 'Appartement utilisé pour les tests.',
+      contactEmail: 'test@example.com',
+      contactPhone: '+212500000001',
       isNew: true,
       updatedMinutesAgo: 2,
       score: 90,
@@ -37,7 +41,11 @@ describe('ListingService', () => {
       bedrooms: 3,
       bathrooms: 2,
       image: 'test-2.jpg',
+      images: ['test-2.jpg'],
       tags: ['Jardin'],
+      description: 'Maison utilisée pour les tests.',
+      contactEmail: 'test@example.com',
+      contactPhone: '+212500000002',
       isNew: false,
       updatedMinutesAgo: 8,
       score: 80,
@@ -55,7 +63,11 @@ describe('ListingService', () => {
       bedrooms: 1,
       bathrooms: 1,
       image: 'test-3.jpg',
+      images: ['test-3.jpg'],
       tags: ['Meuble', 'Fibre'],
+      description: 'Studio utilisé pour les tests.',
+      contactEmail: 'test@example.com',
+      contactPhone: '+212500000003',
       isNew: true,
       updatedMinutesAgo: 1,
       score: 95,
@@ -152,7 +164,7 @@ describe('ListingService', () => {
       newOnly: false,
       sortBy: 'relevance',
       query: '',
-      ...(update as Partial<ListingFilters>),
+      ...(update as Partial<Filter>),
     });
 
     expect(result).toHaveLength(1);

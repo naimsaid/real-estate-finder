@@ -1,9 +1,9 @@
 import { InjectionToken } from '@angular/core';
-import { PropertyListing } from '../models/listing';
+import { Listing } from '../models/listing';
 
 export interface ListingRepository {
-  getListings(): readonly PropertyListing[];
-  getListingById(id: number): PropertyListing | undefined;
+  getListings(): readonly Listing[];
+  getListingById(id: number): Listing | undefined;
 }
 
 export const LISTING_REPOSITORY = new InjectionToken<ListingRepository>('ListingRepository');

@@ -2,7 +2,7 @@ export type ListingMode = 'buy' | 'rent';
 
 export type PropertyType = 'Appartement' | 'Maison' | 'Villa' | 'Studio' | 'Loft';
 
-export interface PropertyListing {
+export interface Listing {
   id: number;
   title: string;
   city: string;

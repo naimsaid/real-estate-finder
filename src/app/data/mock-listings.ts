@@ -1,6 +1,6 @@
-import { PropertyListing } from '../models/listing';
+import { Listing } from '../models/listing';
 
-export const MOCK_LISTINGS: readonly PropertyListing[] = [
+export const MOCK_LISTINGS: readonly Listing[] = [
   {
     id: 1,
     title: 'Appartement lumineux avec terrasse',
