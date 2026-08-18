@@ -1,5 +1,11 @@
 import { CurrencyPipe } from '@angular/common';
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ElementRef,
+  HostListener,
+  inject,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FavoriteService } from '../../services/favorite.service';
@@ -18,11 +24,23 @@ import { ListingService } from '../../services/listing.service';
           <article class="listing-detail">
             <section class="detail-gallery" aria-label="Galerie photos de l’annonce">
               @for (image of item.images; track image; let index = $index) {
-                <img
-                  [src]="image"
-                  [alt]="'Photo ' + (index + 1) + ' du bien « ' + item.title + ' » à ' + item.city"
-                  (error)="useFallbackImage($event)"
-                />
+                <button
+                  class="gallery-item"
+                  type="button"
+                  (click)="openLightbox(index)"
+                  [attr.aria-label]="
+                    'Agrandir la photo ' + (index + 1) + ' sur ' + item.images.length
+                  "
+                >
+                  <img
+                    [src]="image"
+                    [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+                    [alt]="
+                      'Photo ' + (index + 1) + ' du bien « ' + item.title + ' » à ' + item.city
+                    "
+                    (error)="useFallbackImage($event)"
+                  />
+                </button>
               }
             </section>
             <div class="detail-copy">
@@ -101,6 +119,56 @@ import { ListingService } from '../../services/listing.service';
               </div>
             </div>
           </article>
+          @if (lightboxOpen) {
+            <div
+              class="lightbox"
+              role="dialog"
+              aria-modal="true"
+              aria-label="Galerie photos en plein écran"
+              (click)="closeFromBackdrop($event)"
+            >
+              <button
+                #lightboxClose
+                class="lightbox-close"
+                type="button"
+                aria-label="Fermer la galerie"
+                (click)="closeLightbox()"
+              >
+                ×
+              </button>
+              <button
+                class="lightbox-arrow lightbox-previous"
+                type="button"
+                aria-label="Photo précédente"
+                (click)="showPreviousImage()"
+              >
+                ‹
+              </button>
+              <figure>
+                <img
+                  [src]="item.images[activeImageIndex]"
+                  [alt]="
+                    'Photo ' +
+                    (activeImageIndex + 1) +
+                    ' du bien « ' +
+                    item.title +
+                    ' » à ' +
+                    item.city
+                  "
+                  (error)="useFallbackImage($event)"
+                />
+                <figcaption>{{ activeImageIndex + 1 }} / {{ item.images.length }}</figcaption>
+              </figure>
+              <button
+                class="lightbox-arrow lightbox-next"
+                type="button"
+                aria-label="Photo suivante"
+                (click)="showNextImage()"
+              >
+                ›
+              </button>
+            </div>
+          }
         } @else {
           <div class="empty-state">
             <strong>Cette annonce est introuvable.</strong>
@@ -114,10 +182,74 @@ import { ListingService } from '../../services/listing.service';
 })
 export class ListingDetailPage {
   private readonly fallbackImage = '/assets/fallback-property.jpg';
+  private readonly elementRef = inject(ElementRef<HTMLElement>);
   private readonly route = inject(ActivatedRoute);
   private readonly listings = inject(ListingService);
   readonly favorites = inject(FavoriteService);
   readonly listing = this.listings.getListingById(Number(this.route.snapshot.paramMap.get('id')));
+  lightboxOpen = false;
+  activeImageIndex = 0;
+
+  openLightbox(index: number): void {
+    this.activeImageIndex = index;
+    this.lightboxOpen = true;
+    queueMicrotask(() =>
+      this.elementRef.nativeElement.querySelector<HTMLElement>('.lightbox-close')?.focus(),
+    );
+  }
+
+  closeLightbox(): void {
+    this.lightboxOpen = false;
+  }
+
+  closeFromBackdrop(event: MouseEvent): void {
+    if (event.target === event.currentTarget) this.closeLightbox();
+  }
+
+  showPreviousImage(): void {
+    const imageCount = this.listing?.images.length ?? 0;
+    if (imageCount) this.activeImageIndex = (this.activeImageIndex - 1 + imageCount) % imageCount;
+  }
+
+  showNextImage(): void {
+    const imageCount = this.listing?.images.length ?? 0;
+    if (imageCount) this.activeImageIndex = (this.activeImageIndex + 1) % imageCount;
+  }
+
+  @HostListener('document:keydown', ['$event'])
+  handleKeyboard(event: KeyboardEvent): void {
+    if (!this.lightboxOpen) return;
+
+    if (event.key === 'Escape') {
+      event.preventDefault();
+      this.closeLightbox();
+    } else if (event.key === 'ArrowLeft') {
+      event.preventDefault();
+      this.showPreviousImage();
+    } else if (event.key === 'ArrowRight') {
+      event.preventDefault();
+      this.showNextImage();
+    } else if (event.key === 'Tab') {
+      this.trapFocus(event);
+    }
+  }
+
+  private trapFocus(event: KeyboardEvent): void {
+    const controls = Array.from(
+      this.elementRef.nativeElement.querySelectorAll<HTMLElement>('.lightbox button'),
+    );
+    if (!controls.length) return;
+
+    const first = controls[0];
+    const last = controls[controls.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  }
 
   useFallbackImage(event: Event): void {
     const image = event.target as HTMLImageElement;

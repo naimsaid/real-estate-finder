@@ -138,15 +138,94 @@
   grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-rows: minmax(360px, 2fr) minmax(180px, 1fr);
 
-  img {
-    height: 100%;
-    object-fit: cover;
-    width: 100%;
+  .gallery-item {
+    background: none;
+    border: 0;
+    cursor: zoom-in;
+    min-height: 0;
+    overflow: hidden;
+    padding: 0;
 
     &:first-child {
       grid-column: 1 / -1;
     }
+
+    &:focus-visible {
+      outline: 4px solid var(--accent);
+      outline-offset: -4px;
+    }
   }
+
+  img {
+    display: block;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 180ms ease;
+    width: 100%;
+  }
+
+  .gallery-item:hover img {
+    transform: scale(1.025);
+  }
+}
+
+.lightbox {
+  align-items: center;
+  background: rgba(5, 10, 18, 0.96);
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  inset: 0;
+  padding: clamp(16px, 4vw, 56px);
+  position: fixed;
+  z-index: 1000;
+
+  figure {
+    display: grid;
+    gap: 14px;
+    justify-items: center;
+    margin: 0;
+  }
+
+  img {
+    max-height: calc(100vh - 120px);
+    object-fit: contain;
+  }
+
+  figcaption {
+    color: #fff;
+    font-weight: 800;
+  }
+
+  button {
+    align-items: center;
+    background: rgba(255, 255, 255, 0.12);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 999px;
+    color: #fff;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+
+    &:focus-visible {
+      outline: 3px solid #fff;
+      outline-offset: 3px;
+    }
+  }
+}
+
+.lightbox-close {
+  font-size: 2rem;
+  height: 48px;
+  position: absolute;
+  right: 24px;
+  top: 20px;
+  width: 48px;
+}
+
+.lightbox-arrow {
+  font-size: 3rem;
+  height: 60px;
+  width: 60px;
 }
 
 .detail-copy {
@@ -1153,6 +1232,21 @@ select:focus {
 
   .detail-gallery {
     grid-template-rows: 280px 130px;
+  }
+
+  .lightbox {
+    grid-template-columns: 1fr 1fr;
+
+    figure {
+      grid-column: 1 / -1;
+      grid-row: 1;
+    }
+  }
+
+  .lightbox-arrow {
+    height: 48px;
+    justify-self: center;
+    width: 48px;
   }
 
   .detail-copy {
