@@ -32,6 +32,15 @@ import { Listing } from '../../models/listing';
         </button>
       </div>
       <div class="card-body">
+        <label class="compare-control">
+          <input
+            type="checkbox"
+            [checked]="selectedForComparison"
+            [disabled]="comparisonDisabled && !selectedForComparison"
+            (change)="comparisonToggle.emit(listing.id)"
+          />
+          <span>Comparer</span>
+        </label>
         <div class="price-row">
           <strong>{{
             listing.price | currency: (listing.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
@@ -82,7 +91,10 @@ export class ListingCardComponent {
   private readonly fallbackImage = '/assets/fallback-property.jpg';
   @Input({ required: true }) listing!: Listing;
   @Input() favorite = false;
+  @Input() selectedForComparison = false;
+  @Input() comparisonDisabled = false;
   @Output() readonly favoriteToggle = new EventEmitter<number>();
+  @Output() readonly comparisonToggle = new EventEmitter<number>();
 
   useFallbackImage(event: Event): void {
     const image = event.target as HTMLImageElement;

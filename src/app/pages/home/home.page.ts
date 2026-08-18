@@ -9,6 +9,8 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { CurrencyPipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, ParamMap, Router } from '@angular/router';
 import { AdviceSectionComponent } from '../../components/advice-section/advice-section.component';
@@ -18,11 +20,12 @@ import { ListingGridComponent } from '../../components/listing-grid/listing-grid
 import { ListingMapComponent } from '../../components/listing-map/listing-map.component';
 import { SearchPanelComponent } from '../../components/search-panel/search-panel.component';
 import { AmenityOption, EnergyRating, Filter, SelectOption, SortOption } from '../../models/filter';
-import { ListingMode, PropertyType } from '../../models/listing';
+import { Listing, ListingMode, PropertyType } from '../../models/listing';
 import { AdviceService } from '../../services/advice.service';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
 import { SavedSearchService } from '../../services/saved-search.service';
+import { RecentlyViewedService } from '../../services/recently-viewed.service';
 
 const PAGE_SIZE = 12;
 const DEFAULT_FILTERS: Filter = {
@@ -50,6 +53,8 @@ const DEFAULT_FILTERS: Filter = {
 @Component({
   selector: 'app-home-page',
   imports: [
+    CurrencyPipe,
+    RouterLink,
     AdviceSectionComponent,
     FiltersPanelComponent,
     HeaderComponent,
@@ -164,15 +169,114 @@ const DEFAULT_FILTERS: Filter = {
               [sortOptions]="sortOptions"
               [sortBy]="filters().sortBy"
               [favoriteIds]="favorites.favorites()"
+              [comparisonIds]="comparisonIds()"
               (sortChange)="updateFilters({ sortBy: $event })"
               (pageChange)="changePage($event)"
               (favoriteToggle)="favorites.toggleFavorite($event)"
+              (comparisonToggle)="toggleComparison($event)"
             />
           } @else {
             <app-listing-map [listings]="sortedListings()" />
           }
         </div>
       </section>
+      @if (comparisonListings().length >= 2) {
+        <section class="comparison-section" aria-labelledby="comparison-title">
+          <div class="section-heading">
+            <div>
+              <p class="eyebrow">Votre sélection</p>
+              <h2 id="comparison-title">Comparer les biens</h2>
+            </div>
+            <button type="button" (click)="clearComparison()">Effacer la sélection</button>
+          </div>
+          <div class="comparison-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">Critère</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <th scope="col">
+                      <a [routerLink]="['/annonces', item.id]">{{ item.title }}</a>
+                    </th>
+                  }
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <th scope="row">Prix</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <td>
+                      {{
+                        item.price
+                          | currency: (item.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
+                      }}{{ item.mode === 'rent' ? ' / mois' : '' }}
+                    </td>
+                  }
+                </tr>
+                <tr>
+                  <th scope="row">Localisation</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <td>{{ item.district }}, {{ item.city }}</td>
+                  }
+                </tr>
+                <tr>
+                  <th scope="row">Type</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <td>{{ item.type }}</td>
+                  }
+                </tr>
+                <tr>
+                  <th scope="row">Surface</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <td>{{ item.area }} m²</td>
+                  }
+                </tr>
+                <tr>
+                  <th scope="row">Pièces</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <td>{{ item.rooms }}</td>
+                  }
+                </tr>
+                <tr>
+                  <th scope="row">Chambres</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <td>{{ item.bedrooms }}</td>
+                  }
+                </tr>
+                <tr>
+                  <th scope="row">Salles de bain</th>
+                  @for (item of comparisonListings(); track item.id) {
+                    <td>{{ item.bathrooms }}</td>
+                  }
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      }
+      @if (recentlyViewedListings().length) {
+        <section class="recently-viewed" aria-labelledby="recently-viewed-title">
+          <p class="eyebrow">Votre historique</p>
+          <h2 id="recently-viewed-title">Vu récemment</h2>
+          <div class="recent-list">
+            @for (item of recentlyViewedListings(); track item.id) {
+              <article>
+                <img [src]="item.image" [alt]="'Photo de ' + item.title" />
+                <div>
+                  <h3>
+                    <a [routerLink]="['/annonces', item.id]">{{ item.title }}</a>
+                  </h3>
+                  <p>{{ item.city }} · {{ item.area }} m²</p>
+                  <strong>{{
+                    item.price
+                      | currency: (item.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
+                  }}</strong>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
       <app-advice-section [advice]="advice" />
     </main>
   `,
@@ -183,6 +287,7 @@ export class HomePage {
   readonly listings = inject(ListingService);
   readonly favorites = inject(FavoriteService);
   readonly savedSearches = inject(SavedSearchService);
+  readonly recentlyViewed = inject(RecentlyViewedService);
   private readonly adviceService = inject(AdviceService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -223,6 +328,7 @@ export class HomePage {
   readonly filters = signal<Filter>(this.filtersFromParams(this.route.snapshot.queryParamMap));
   readonly currentPage = signal(1);
   readonly viewMode = signal<'list' | 'map'>('list');
+  readonly comparisonIds = signal<number[]>([]);
   readonly filtersOpen = signal(false);
   readonly isMobile = signal(false);
   readonly filteredListings = this.listings.search(this.filters);
@@ -234,6 +340,10 @@ export class HomePage {
     const start = (this.currentPage() - 1) * PAGE_SIZE;
     return this.sortedListings().slice(start, start + PAGE_SIZE);
   });
+  readonly comparisonListings = computed(() => this.resolveListings(this.comparisonIds()));
+  readonly recentlyViewedListings = computed(() =>
+    this.resolveListings(this.recentlyViewed.recentlyViewedIds()),
+  );
 
   constructor() {
     const mobileQuery = window.matchMedia?.('(max-width: 1040px)');
@@ -333,6 +443,27 @@ export class HomePage {
 
   saveSearch(): void {
     this.savedSearches.save(this.filters());
+  }
+
+  toggleComparison(id: number): void {
+    this.comparisonIds.update((ids) =>
+      ids.includes(id)
+        ? ids.filter((itemId) => itemId !== id)
+        : ids.length < 3
+          ? [...ids, id]
+          : ids,
+    );
+  }
+
+  clearComparison(): void {
+    this.comparisonIds.set([]);
+  }
+
+  private resolveListings(ids: number[]): Listing[] {
+    return ids.flatMap((id) => {
+      const listing = this.listings.getListingById(id);
+      return listing ? [listing] : [];
+    });
   }
 
   private filtersFromParams(params: ParamMap): Filter {

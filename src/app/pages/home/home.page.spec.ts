@@ -162,4 +162,13 @@ describe('HomePage', () => {
       minRooms: 3,
     });
   });
+
+  it('limits comparison to three listings and allows removing one', () => {
+    const page = TestBed.createComponent(HomePage).componentInstance;
+    [1, 2, 3, 4].forEach((id) => page.toggleComparison(id));
+
+    expect(page.comparisonIds()).toEqual([1, 2, 3]);
+    page.toggleComparison(2);
+    expect(page.comparisonIds()).toEqual([1, 3]);
+  });
 });
