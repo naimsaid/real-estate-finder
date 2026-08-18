@@ -49,6 +49,41 @@ describe('ListingDetailPage gallery', () => {
     expect(fixture.componentInstance.lightboxOpen).toBe(false);
   });
 
+  it('navigue par swipe tactile et ignore les gestes trop courts', () => {
+    const fixture = TestBed.createComponent(ListingDetailPage);
+    fixture.componentInstance.openLightbox(0);
+
+    fixture.componentInstance.onTouchStart({
+      changedTouches: [{ clientX: 240 }],
+    } as unknown as TouchEvent);
+    fixture.componentInstance.onTouchEnd({
+      changedTouches: [{ clientX: 120 }],
+    } as unknown as TouchEvent);
+    expect(fixture.componentInstance.activeImageIndex).toBe(1);
+
+    fixture.componentInstance.onTouchStart({
+      changedTouches: [{ clientX: 120 }],
+    } as unknown as TouchEvent);
+    fixture.componentInstance.onTouchEnd({
+      changedTouches: [{ clientX: 140 }],
+    } as unknown as TouchEvent);
+    expect(fixture.componentInstance.activeImageIndex).toBe(1);
+  });
+
+  it('affiche le plan disponible et réserve la haute définition à la lightbox', () => {
+    const fixture = TestBed.createComponent(ListingDetailPage);
+    fixture.detectChanges();
+    const page = fixture.nativeElement as HTMLElement;
+
+    expect(page.querySelector('.media-badge')?.textContent).toContain('Plan d’étage');
+    expect(page.querySelector<HTMLImageElement>('.detail-gallery img')?.src).toContain('w=640');
+
+    fixture.componentInstance.openLightbox(0);
+    fixture.detectChanges();
+    expect(page.querySelector<HTMLImageElement>('.lightbox img')?.src).toContain('w=1600');
+    expect(page.querySelector('.lightbox figcaption')?.textContent).toContain('1 / 4');
+  });
+
   it('piège le focus dans la lightbox puis le restitue au déclencheur', async () => {
     const fixture = TestBed.createComponent(ListingDetailPage);
     fixture.detectChanges();

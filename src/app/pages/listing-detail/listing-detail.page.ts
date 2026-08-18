@@ -6,11 +6,17 @@ import {
   inject,
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { HeaderComponent } from '../../components/header/header.component';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
 import { RecentlyViewedService } from '../../services/recently-viewed.service';
 import { formatPrice, formatSurface } from '../../utils/listing-format';
+
+type GalleryMedia = {
+  kind: 'photo' | 'floor-plan' | 'virtual-tour';
+  src: string;
+};
 
 @Component({
   selector: 'app-listing-detail-page',
@@ -24,24 +30,29 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
         @if (listing; as item) {
           <article class="listing-detail">
             <section class="detail-gallery" aria-label="Galerie photos de l’annonce">
-              @for (image of item.images; track image; let index = $index) {
+              @for (media of galleryMedia; track media.src; let index = $index) {
                 <button
                   #galleryTrigger
                   class="gallery-item"
                   type="button"
                   (click)="openLightbox(index, galleryTrigger)"
                   [attr.aria-label]="
-                    'Agrandir la photo ' + (index + 1) + ' sur ' + item.images.length
+                    mediaLabel(media) + ' ' + (index + 1) + ' sur ' + galleryMedia.length
                   "
                 >
-                  <img
-                    [src]="image"
-                    [attr.loading]="index === 0 ? 'eager' : 'lazy'"
-                    [alt]="
-                      'Photo ' + (index + 1) + ' du bien « ' + item.title + ' » à ' + item.city
-                    "
-                    (error)="useFallbackImage($event)"
-                  />
+                  @if (media.kind === 'virtual-tour') {
+                    <span class="virtual-tour-preview" aria-hidden="true">360°</span>
+                  } @else {
+                    <img
+                      [src]="thumbnailUrl(media.src)"
+                      [attr.loading]="index === 0 ? 'eager' : 'lazy'"
+                      [alt]="mediaAlt(media, index)"
+                      (error)="useFallbackImage($event)"
+                    />
+                  }
+                  @if (media.kind !== 'photo') {
+                    <span class="media-badge">{{ mediaLabel(media) }}</span>
+                  }
                 </button>
               }
             </section>
@@ -125,6 +136,8 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
               aria-label="Galerie photos en plein écran"
               (click)="closeFromBackdrop($event)"
               (keydown)="handleLightboxKeyboard($event)"
+              (touchstart)="onTouchStart($event)"
+              (touchend)="onTouchEnd($event)"
             >
               <button
                 #lightboxClose
@@ -144,19 +157,25 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
                 ‹
               </button>
               <figure>
-                <img
-                  [src]="item.images[activeImageIndex]"
-                  [alt]="
-                    'Photo ' +
-                    (activeImageIndex + 1) +
-                    ' du bien « ' +
-                    item.title +
-                    ' » à ' +
-                    item.city
-                  "
-                  (error)="useFallbackImage($event)"
-                />
-                <figcaption>{{ activeImageIndex + 1 }} / {{ item.images.length }}</figcaption>
+                @if (activeMedia; as media) {
+                  @if (media.kind === 'virtual-tour') {
+                    <iframe
+                      class="virtual-tour-frame"
+                      [src]="trustedVirtualTourUrl(media.src)"
+                      title="Visite virtuelle 360°"
+                      allowfullscreen
+                    ></iframe>
+                  } @else {
+                    <img
+                      [src]="media.src"
+                      [alt]="mediaAlt(media, activeImageIndex)"
+                      (error)="useFallbackImage($event)"
+                    />
+                  }
+                  <figcaption aria-live="polite">
+                    {{ mediaLabel(media) }} · {{ activeImageIndex + 1 }} / {{ galleryMedia.length }}
+                  </figcaption>
+                }
               </figure>
               <button
                 class="lightbox-arrow lightbox-next"
@@ -187,11 +206,27 @@ export class ListingDetailPage {
   private readonly route = inject(ActivatedRoute);
   private readonly listings = inject(ListingService);
   private readonly recentlyViewed = inject(RecentlyViewedService);
+  private readonly sanitizer = inject(DomSanitizer);
   private lightboxTrigger?: HTMLElement;
   readonly favorites = inject(FavoriteService);
   readonly listing = this.listings.getListingById(Number(this.route.snapshot.paramMap.get('id')));
   lightboxOpen = false;
   activeImageIndex = 0;
+  private touchStartX?: number;
+
+  readonly galleryMedia: readonly GalleryMedia[] = this.listing
+    ? [
+        ...this.listing.images.map((src) => ({ kind: 'photo' as const, src })),
+        ...(this.listing.floorPlans ?? []).map((src) => ({ kind: 'floor-plan' as const, src })),
+        ...(this.listing.virtualTourUrl
+          ? [{ kind: 'virtual-tour' as const, src: this.listing.virtualTourUrl }]
+          : []),
+      ]
+    : [];
+
+  get activeMedia(): GalleryMedia | undefined {
+    return this.galleryMedia[this.activeImageIndex];
+  }
 
   constructor() {
     if (this.listing) this.recentlyViewed.record(this.listing.id);
@@ -219,12 +254,12 @@ export class ListingDetailPage {
   }
 
   showPreviousImage(): void {
-    const imageCount = this.listing?.images.length ?? 0;
+    const imageCount = this.galleryMedia.length;
     if (imageCount) this.activeImageIndex = (this.activeImageIndex - 1 + imageCount) % imageCount;
   }
 
   showNextImage(): void {
-    const imageCount = this.listing?.images.length ?? 0;
+    const imageCount = this.galleryMedia.length;
     if (imageCount) this.activeImageIndex = (this.activeImageIndex + 1) % imageCount;
   }
 
@@ -249,6 +284,44 @@ export class ListingDetailPage {
   handleLightboxKeyboard(event: KeyboardEvent): void {
     event.stopPropagation();
     this.handleKeyboard(event);
+  }
+
+  onTouchStart(event: TouchEvent): void {
+    this.touchStartX = event.changedTouches[0]?.clientX;
+  }
+
+  onTouchEnd(event: TouchEvent): void {
+    const endX = event.changedTouches[0]?.clientX;
+    if (this.touchStartX === undefined || endX === undefined) return;
+
+    const distance = endX - this.touchStartX;
+    this.touchStartX = undefined;
+    if (Math.abs(distance) < 50) return;
+    if (distance > 0) this.showPreviousImage();
+    else this.showNextImage();
+  }
+
+  thumbnailUrl(src: string): string {
+    if (!src.includes('images.unsplash.com')) return src;
+    const url = new URL(src);
+    url.searchParams.set('w', '640');
+    url.searchParams.set('q', '60');
+    return url.toString();
+  }
+
+  mediaLabel(media: GalleryMedia): string {
+    if (media.kind === 'floor-plan') return 'Plan d’étage';
+    if (media.kind === 'virtual-tour') return 'Visite 360°';
+    return 'Photo';
+  }
+
+  mediaAlt(media: GalleryMedia, index: number): string {
+    if (!this.listing) return '';
+    return `${this.mediaLabel(media)} ${index + 1} du bien « ${this.listing.title} » à ${this.listing.city}`;
+  }
+
+  trustedVirtualTourUrl(src: string): SafeResourceUrl {
+    return this.sanitizer.bypassSecurityTrustResourceUrl(src);
   }
 
   private trapFocus(event: KeyboardEvent): void {

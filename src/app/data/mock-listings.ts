@@ -21,6 +21,7 @@ export const MOCK_LISTINGS: readonly Listing[] = [
       'https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?auto=format&fit=crop&w=1200&q=80',
       'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1200&q=80',
     ],
+    floorPlans: ['/assets/floor-plan-example.svg'],
     tags: ['Terrasse', 'Parking', 'Ascenseur'],
     description:
       'Appartement traversant baigné de lumière, avec une grande terrasse et des finitions soignées. La résidence sécurisée se trouve à proximité immédiate des commerces et des principaux axes.',

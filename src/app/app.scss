@@ -161,6 +161,7 @@
     min-height: 0;
     overflow: hidden;
     padding: 0;
+    position: relative;
 
     &:first-child {
       grid-column: 1 / -1;
@@ -185,6 +186,30 @@
   }
 }
 
+.media-badge {
+  background: rgba(5, 10, 18, 0.82);
+  border-radius: 999px;
+  bottom: 12px;
+  color: #fff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  left: 12px;
+  padding: 6px 10px;
+  position: absolute;
+}
+
+.virtual-tour-preview {
+  align-items: center;
+  background: linear-gradient(135deg, #173c62, #0b8f85);
+  color: #fff;
+  display: flex;
+  font-size: clamp(2.2rem, 6vw, 5rem);
+  font-weight: 900;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+}
+
 .lightbox {
   align-items: center;
   background: rgba(5, 10, 18, 0.96);
@@ -194,6 +219,7 @@
   padding: clamp(16px, 4vw, 56px);
   position: fixed;
   z-index: 1000;
+  touch-action: pan-y;
 
   figure {
     display: grid;
@@ -227,6 +253,12 @@
       outline-offset: 3px;
     }
   }
+}
+
+.virtual-tour-frame {
+  border: 0;
+  height: min(72vh, 720px);
+  width: min(80vw, 1100px);
 }
 
 .lightbox-close {
