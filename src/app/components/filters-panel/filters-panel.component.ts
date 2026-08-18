@@ -1,13 +1,13 @@
 import { CurrencyPipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, EventEmitter, Input, Output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { LucideAngularModule } from 'lucide-angular';
+import { LucideDynamicIcon } from '@lucide/angular';
 import { AmenityOption, EnergyRating, Filter, SelectOption, SortOption } from '../../models/filter';
 import { PropertyType } from '../../models/listing';
 
 @Component({
   selector: 'app-filters-panel',
-  imports: [CurrencyPipe, FormsModule, LucideAngularModule],
+  imports: [CurrencyPipe, FormsModule, LucideDynamicIcon],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <aside class="filters-panel" aria-label="Filtres avances">
@@ -16,7 +16,7 @@ import { PropertyType } from '../../models/listing';
         <div class="advanced-grid">
           <label class="range-field compact-range"
             ><span class="field-label"
-              ><i-lucide class="criteria-icon" name="house" aria-hidden="true" />Budget
+              ><svg class="criteria-icon" lucideIcon="house" aria-hidden="true"></svg>Budget
               maximum</span
             ><strong>{{
               filters.maxBudget
@@ -32,7 +32,7 @@ import { PropertyType } from '../../models/listing';
           /></label>
           <div class="filter-group">
             <span class="field-label"
-              ><i-lucide class="criteria-icon" name="building-2" aria-hidden="true" />Types
+              ><svg class="criteria-icon" lucideIcon="building-2" aria-hidden="true"></svg>Types
               populaires</span
             >
             <div class="chip-list">
@@ -56,7 +56,7 @@ import { PropertyType } from '../../models/listing';
           </div>
           <label
             ><span class="field-label"
-              ><i-lucide class="criteria-icon" name="bed-double" aria-hidden="true" />Chambres
+              ><svg class="criteria-icon" lucideIcon="bed-double" aria-hidden="true"></svg>Chambres
               min.</span
             ><select
               [ngModel]="filters.minBedrooms"
@@ -69,7 +69,7 @@ import { PropertyType } from '../../models/listing';
           >
           <label
             ><span class="field-label"
-              ><i-lucide class="criteria-icon" name="bath" aria-hidden="true" />Salles de bain
+              ><svg class="criteria-icon" lucideIcon="bath" aria-hidden="true"></svg>Salles de bain
               min.</span
             ><select
               [ngModel]="filters.minBathrooms"
@@ -82,7 +82,7 @@ import { PropertyType } from '../../models/listing';
           >
           <div class="range-field compact-range area-range">
             <span class="field-label"
-              ><i-lucide class="criteria-icon" name="ruler" aria-hidden="true" />Surface</span
+              ><svg class="criteria-icon" lucideIcon="ruler" aria-hidden="true"></svg>Surface</span
             ><strong id="area-range-value"
               >{{ filters.minArea }} m2 -
               {{ filters.maxArea === 500 ? 'Illimitee' : filters.maxArea + ' m2' }}</strong
@@ -124,7 +124,7 @@ import { PropertyType } from '../../models/listing';
           </div>
           <label
             ><span class="field-label"
-              ><i-lucide class="criteria-icon" name="arrow-up-down" aria-hidden="true" />Trier
+              ><svg class="criteria-icon" lucideIcon="arrow-up-down" aria-hidden="true"></svg>Trier
               par</span
             ><select [ngModel]="filters.sortBy" (ngModelChange)="patch({ sortBy: $event })">
               @for (option of sortOptions; track option.value) {
@@ -199,7 +199,7 @@ import { PropertyType } from '../../models/listing';
             [checked]="filters.newOnly"
             (change)="onNewOnlyChange($event)"
           /><span
-            ><i-lucide class="criteria-icon" name="sparkles" aria-hidden="true" />Nouvelles annonces
+            ><svg class="criteria-icon" lucideIcon="sparkles" aria-hidden="true"></svg>Nouvelles annonces
             uniquement</span
           ></label
         >
@@ -212,7 +212,7 @@ import { PropertyType } from '../../models/listing';
                 [class.selected]="filters.amenities.includes(amenity.label)"
                 (click)="toggleAmenity(amenity.label)"
               >
-                <i-lucide class="criteria-icon" [name]="amenity.icon" aria-hidden="true" />{{
+                <svg class="criteria-icon" [lucideIcon]="amenity.icon" aria-hidden="true"></svg>{{
                   amenity.label
                 }}
               </button>
