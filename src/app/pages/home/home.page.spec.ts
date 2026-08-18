@@ -163,6 +163,17 @@ describe('HomePage', () => {
     });
   });
 
+  it('filters by district and persists the selected location in query params', async () => {
+    const router = TestBed.inject(Router);
+    const page = TestBed.createComponent(HomePage).componentInstance;
+
+    page.updateFilters({ city: 'Anfa' });
+    await router.navigateByUrl(router.url);
+
+    expect(page.filteredListings().map(({ id }) => id)).toEqual([1]);
+    expect(router.url).toContain('city=Anfa');
+  });
+
   it('limits comparison to three listings and allows removing one', () => {
     const page = TestBed.createComponent(HomePage).componentInstance;
     [1, 2, 3, 4].forEach((id) => page.toggleComparison(id));

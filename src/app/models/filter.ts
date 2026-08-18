@@ -30,6 +30,14 @@ export interface SelectOption<T> {
   value: T;
 }
 
+export interface LocationOption {
+  label: string;
+  value: string;
+  type: 'city' | 'district';
+  city: string;
+  postalCode: string;
+}
+
 export interface AmenityOption {
   label: string;
   icon: string;

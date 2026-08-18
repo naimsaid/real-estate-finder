@@ -8,6 +8,7 @@ export interface Listing {
   title: string;
   city: string;
   district: string;
+  postalCode?: string;
   mode: ListingMode;
   type: PropertyType;
   price: number;
