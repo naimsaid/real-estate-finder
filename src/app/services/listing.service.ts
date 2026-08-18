@@ -59,7 +59,10 @@ export class ListingService {
     return listings.filter((listing) => {
       if (
         listing.mode !== filters.mode ||
-        (filters.city !== 'Toutes les villes' && listing.city !== filters.city) ||
+        (filters.city !== 'Toutes les villes' &&
+          listing.city !== filters.city &&
+          listing.district !== filters.city &&
+          listing.postalCode !== filters.city) ||
         (filters.propertyType !== 'Tous' && listing.type !== filters.propertyType) ||
         listing.price > filters.maxBudget ||
         listing.rooms < filters.minRooms ||
@@ -91,6 +94,7 @@ export class ListingService {
           listing.description,
           listing.city,
           listing.district,
+          listing.postalCode,
           listing.type,
           ...listing.tags,
         ]

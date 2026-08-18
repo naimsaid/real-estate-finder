@@ -18,7 +18,14 @@ import { HeaderComponent } from '../../components/header/header.component';
 import { ListingGridComponent } from '../../components/listing-grid/listing-grid.component';
 import { ListingMapComponent } from '../../components/listing-map/listing-map.component';
 import { SearchPanelComponent } from '../../components/search-panel/search-panel.component';
-import { AmenityOption, EnergyRating, Filter, SelectOption, SortOption } from '../../models/filter';
+import {
+  AmenityOption,
+  EnergyRating,
+  Filter,
+  LocationOption,
+  SelectOption,
+  SortOption,
+} from '../../models/filter';
 import { Listing, ListingMode, PROPERTY_TYPES, PropertyType } from '../../models/listing';
 import { AdviceService } from '../../services/advice.service';
 import { FavoriteService } from '../../services/favorite.service';
@@ -70,7 +77,7 @@ const DEFAULT_FILTERS: Filter = {
       <app-header />
       <app-search-panel
         [modes]="modes"
-        [cities]="cities"
+        [locations]="locations()"
         [propertyTypes]="propertyTypes"
         [selectedMode]="filters().mode"
         [selectedCity]="filters().city"
@@ -295,15 +302,34 @@ export class HomePage {
     { label: 'Louer', value: 'rent' },
   ];
   readonly propertyTypes: PropertyType[] = [...PROPERTY_TYPES];
-  readonly cities = [
-    'Toutes les villes',
-    'Casablanca',
-    'Rabat',
-    'Marrakech',
-    'Tanger',
-    'Agadir',
-    'Paris',
-  ];
+  readonly locations = computed<LocationOption[]>(() => {
+    const listings = this.listings.listings();
+    const cities = new Map<string, LocationOption>();
+    const districts = new Map<string, LocationOption>();
+
+    for (const listing of listings) {
+      if (!cities.has(listing.city)) {
+        cities.set(listing.city, {
+          label: listing.city,
+          value: listing.city,
+          type: 'city',
+          city: listing.city,
+          postalCode: listing.postalCode ?? '',
+        });
+      }
+      if (!districts.has(listing.district)) {
+        districts.set(listing.district, {
+          label: listing.district,
+          value: listing.district,
+          type: 'district',
+          city: listing.city,
+          postalCode: listing.postalCode ?? '',
+        });
+      }
+    }
+
+    return [...cities.values(), ...districts.values()];
+  });
   readonly amenities: AmenityOption[] = [
     { label: 'Terrasse', icon: 'land-plot' },
     { label: 'Balcon', icon: 'building-2' },
