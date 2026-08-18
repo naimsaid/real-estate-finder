@@ -16,6 +16,12 @@ describe('FiltersPanelComponent', () => {
     newOnly: false,
     sortBy: 'relevance',
     query: '',
+    includeKeywords: '',
+    excludeKeywords: '',
+    publishedWithinDays: 0,
+    minFloor: 0,
+    maxFloor: 0,
+    energyRatings: [],
   };
 
   let component: FiltersPanelComponent;
@@ -83,5 +89,17 @@ describe('FiltersPanelComponent', () => {
   it('exposes surface bounds as track percentages', () => {
     expect(component.minAreaPercent).toBe(20);
     expect(component.maxAreaPercent).toBe(40);
+  });
+
+  it('keeps floor bounds coherent and toggles DPE ratings', () => {
+    const emitted: Partial<Filter>[] = [];
+    component.filters = { ...component.filters, minFloor: 2, maxFloor: 5 };
+    component.filtersChange.subscribe((value) => emitted.push(value));
+
+    component.setMinFloor(10);
+    component.setMaxFloor(1);
+    component.toggleEnergyRating('B');
+
+    expect(emitted).toEqual([{ minFloor: 5 }, { maxFloor: 2 }, { energyRatings: ['B'] }]);
   });
 });

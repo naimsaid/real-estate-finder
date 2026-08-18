@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { Router } from '@angular/router';
 import { appConfig } from '../../app.config';
 import { MOCK_LISTINGS } from '../../data/mock-listings';
 import { LISTING_REPOSITORY } from '../../repositories/listing.repository';
@@ -113,5 +114,39 @@ describe('HomePage', () => {
     page.paginatedListings();
 
     expect(filterSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('synchronizes advanced filters with query params and restores them', async () => {
+    const router = TestBed.inject(Router);
+    const page = TestBed.createComponent(HomePage).componentInstance;
+
+    page.updateFilters({
+      includeKeywords: 'terrasse, calme',
+      excludeKeywords: 'travaux',
+      publishedWithinDays: 7,
+      minFloor: 2,
+      maxFloor: 8,
+      energyRatings: ['A', 'B'],
+    });
+    await router.navigateByUrl(router.url);
+
+    expect(router.url).toContain('include=terrasse%2C%20calme');
+    expect(router.url).toContain('exclude=travaux');
+    expect(router.url).toContain('publishedWithinDays=7');
+    expect(router.url).toContain('minFloor=2');
+    expect(router.url).toContain('maxFloor=8');
+    expect(router.url).toContain('dpe=A&dpe=B');
+
+    await router.navigateByUrl(
+      '/?include=balcon&exclude=bruyant&publishedWithinDays=3&minFloor=1&maxFloor=4&dpe=C',
+    );
+    expect(page.filters()).toMatchObject({
+      includeKeywords: 'balcon',
+      excludeKeywords: 'bruyant',
+      publishedWithinDays: 3,
+      minFloor: 1,
+      maxFloor: 4,
+      energyRatings: ['C'],
+    });
   });
 });

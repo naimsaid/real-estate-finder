@@ -47,11 +47,14 @@ export class ListingService {
     return this.sort(this.filterMatches(listings, filters), filters.sortBy);
   }
 
-  filterMatches(
-    listings: readonly Listing[],
-    filters: ListingCriteria,
-  ): Listing[] {
+  filterMatches(listings: readonly Listing[], filters: ListingCriteria): Listing[] {
     const query = filters.query.trim().toLowerCase();
+    const includedKeywords = this.keywords(filters.includeKeywords);
+    const excludedKeywords = this.keywords(filters.excludeKeywords);
+    const earliestPublication =
+      filters.publishedWithinDays > 0
+        ? Date.now() - filters.publishedWithinDays * 24 * 60 * 60 * 1000
+        : null;
 
     return listings.filter((listing) => {
       if (
@@ -65,28 +68,53 @@ export class ListingService {
         listing.area < filters.minArea ||
         listing.area > filters.maxArea ||
         (filters.newOnly && !listing.isNew) ||
+        (filters.minFloor > 0 &&
+          (listing.floor === undefined || listing.floor < filters.minFloor)) ||
+        (filters.maxFloor > 0 &&
+          (listing.floor === undefined || listing.floor > filters.maxFloor)) ||
+        (filters.energyRatings.length > 0 &&
+          (listing.energyRating === undefined ||
+            !filters.energyRatings.includes(listing.energyRating))) ||
+        (earliestPublication !== null &&
+          (listing.publishedAt === undefined ||
+            !Number.isFinite(Date.parse(listing.publishedAt)) ||
+            Date.parse(listing.publishedAt) < earliestPublication)) ||
         !filters.amenities.every((amenity) => listing.tags.includes(amenity))
       ) {
         return false;
       }
 
-      if (!query) return true;
-
       let text = this.searchableText.get(listing);
       if (!text) {
-        text = [listing.title, listing.city, listing.district, listing.type, ...listing.tags]
+        text = [
+          listing.title,
+          listing.description,
+          listing.city,
+          listing.district,
+          listing.type,
+          ...listing.tags,
+        ]
           .join(' ')
           .toLowerCase();
         this.searchableText.set(listing, text);
       }
-      return text.includes(query);
+      return (
+        (!query || text.includes(query)) &&
+        includedKeywords.every((keyword) => text.includes(keyword)) &&
+        excludedKeywords.every((keyword) => !text.includes(keyword))
+      );
     });
   }
 
-  sort(
-    listings: readonly Listing[],
-    sortBy: Filter['sortBy'],
-  ): Listing[] {
+  private keywords(value: string): string[] {
+    return value
+      .toLowerCase()
+      .split(/[,;]+/)
+      .map((keyword) => keyword.trim())
+      .filter(Boolean);
+  }
+
+  sort(listings: readonly Listing[], sortBy: Filter['sortBy']): Listing[] {
     return [...listings].sort((a, b) =>
       sortBy === 'priceAsc'
         ? a.price - b.price

@@ -23,4 +23,7 @@ export interface Listing {
   isNew: boolean;
   updatedMinutesAgo: number;
   score: number;
+  publishedAt?: string;
+  floor?: number;
+  energyRating?: 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 }
