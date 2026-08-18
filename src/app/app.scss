@@ -523,6 +523,12 @@ label {
   min-width: 24px;
   padding: 5px;
   width: 24px;
+
+  svg {
+    display: block;
+    height: 14px;
+    width: 14px;
+  }
 }
 
 .criteria-icon {
