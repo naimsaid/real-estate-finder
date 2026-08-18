@@ -28,7 +28,6 @@ import { ListingService } from '../../services/listing.service';
             <div class="detail-copy">
               <p class="eyebrow">{{ item.type }} · {{ item.city }}</p>
               <h1>{{ item.title }}</h1>
-              <p class="detail-location">{{ item.district }}, {{ item.city }}</p>
               <strong class="detail-price"
                 >{{
                   item.price | currency: (item.mode === 'buy' ? 'MAD' : 'EUR') : 'symbol' : '1.0-0'
@@ -64,18 +63,26 @@ import { ListingService } from '../../services/listing.service';
                 <h2 id="description-title">Description</h2>
                 <p class="detail-description">{{ item.description }}</p>
               </section>
+              <section class="detail-section" aria-labelledby="location-title">
+                <h2 id="location-title">Localisation</h2>
+                <p class="detail-location">{{ item.district }}, {{ item.city }}</p>
+              </section>
+              <section class="detail-section" aria-labelledby="contact-title">
+                <h2 id="contact-title">Contact</h2>
+                <a [href]="'mailto:' + item.contactEmail">{{ item.contactEmail }}</a>
+                <a
+                  class="phone-link"
+                  [href]="'tel:' + item.contactPhone"
+                  [attr.aria-label]="'Appeler l’agence au ' + item.contactPhone"
+                  >{{ item.contactPhone }}</a
+                >
+              </section>
               <div class="detail-actions">
                 <a
                   class="ghost-button"
                   [routerLink]="['/contact', item.id]"
                   [attr.aria-label]="'Contacter l’agence pour ' + item.title"
                   >Contacter</a
-                >
-                <a
-                  class="phone-link"
-                  [href]="'tel:' + item.contactPhone"
-                  [attr.aria-label]="'Appeler l’agence au ' + item.contactPhone"
-                  >{{ item.contactPhone }}</a
                 >
                 <button
                   class="favorite-detail"
