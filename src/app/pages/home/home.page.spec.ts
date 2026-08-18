@@ -77,8 +77,8 @@ describe('HomePage', () => {
     });
   });
 
-  it('paginates client-side by 12 and resets the page when filters change', () => {
-    const listings = Array.from({ length: 25 }, (_, index) => ({
+  it('paginates client-side by 12, including above 100 results, and resets on filters', () => {
+    const listings = Array.from({ length: 101 }, (_, index) => ({
       ...MOCK_LISTINGS[0],
       id: index + 1,
       score: 100 - index,
@@ -92,10 +92,10 @@ describe('HomePage', () => {
     const page = TestBed.createComponent(HomePage).componentInstance;
 
     expect(page.paginatedListings()).toHaveLength(12);
-    expect(page.totalPages()).toBe(3);
+    expect(page.totalPages()).toBe(9);
 
-    page.changePage(3);
-    expect(page.paginatedListings()).toHaveLength(1);
+    page.changePage(9);
+    expect(page.paginatedListings()).toHaveLength(5);
 
     page.updateFilters({ sortBy: 'priceAsc' });
     expect(page.currentPage()).toBe(1);
