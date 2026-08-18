@@ -116,4 +116,41 @@ describe('ListingDetailPage gallery', () => {
 
     expect(image.src).toContain('/assets/fallback-property.jpg');
   });
+
+  it('utilise le partage natif avec une URL trackée', async () => {
+    const fixture = TestBed.createComponent(ListingDetailPage);
+    const share = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(window.navigator, 'share', { configurable: true, value: share });
+
+    await fixture.componentInstance.shareListing();
+
+    expect(share).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: fixture.componentInstance.listing?.title,
+        url: expect.stringContaining(
+          '/annonces/1?utm_source=habita&utm_medium=web_share&utm_campaign=listing_share',
+        ),
+      }),
+    );
+    expect(fixture.componentInstance.shareFeedback).toBe('Annonce partagée.');
+  });
+
+  it('copie le lien tracké quand le partage natif est indisponible', async () => {
+    const fixture = TestBed.createComponent(ListingDetailPage);
+    const writeText = vi.fn().mockResolvedValue(undefined);
+    Object.defineProperty(window.navigator, 'share', { configurable: true, value: undefined });
+    Object.defineProperty(window.navigator, 'clipboard', {
+      configurable: true,
+      value: { writeText },
+    });
+
+    await fixture.componentInstance.shareListing();
+
+    expect(writeText).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '/annonces/1?utm_source=habita&utm_medium=clipboard&utm_campaign=listing_share',
+      ),
+    );
+    expect(fixture.componentInstance.shareFeedback).toBe('Lien copié dans le presse-papiers.');
+  });
 });
