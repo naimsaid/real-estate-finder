@@ -13,6 +13,10 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
     <aside class="filters-panel" aria-label="Filtres avances">
       <details class="more-filters" open>
         <summary><span>Plus de criteres</span><b>+</b></summary>
+        <div class="filter-section-heading">
+          <h3>Bien recherche</h3>
+          <button type="button" (click)="resetPropertySection()">Reinitialiser</button>
+        </div>
         <div class="advanced-grid">
           <label class="range-field compact-range"
             ><span class="field-label"
@@ -128,6 +132,12 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
               }
             </select></label
           >
+        </div>
+        <div class="filter-section-heading">
+          <h3>Annonce</h3>
+          <button type="button" (click)="resetListingSection()">Reinitialiser</button>
+        </div>
+        <div class="advanced-grid">
           <label
             ><span class="field-label">Mots-cles inclus</span
             ><input
@@ -176,7 +186,11 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
           >
         </div>
         <div class="filter-group">
-          <span>Performance energetique (si renseignee)</span>
+          <div class="filter-section-heading">
+            <h3>Performance energetique</h3>
+            <button type="button" (click)="resetEnergySection()">Reinitialiser</button>
+          </div>
+          <span>(si renseignee)</span>
           <div class="chip-list">
             @for (rating of energyRatingOptions; track rating) {
               <button
@@ -200,7 +214,10 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
           ></label
         >
         <div class="filter-group">
-          <span>Equipements et options</span>
+          <div class="filter-section-heading">
+            <h3>Equipements et options</h3>
+            <button type="button" (click)="resetAmenitiesSection()">Reinitialiser</button>
+          </div>
           <div class="amenity-list">
             @for (amenity of amenities; track amenity.label) {
               <button
@@ -282,5 +299,31 @@ export class FiltersPanelComponent {
         ? this.filters.amenities.filter((item) => item !== amenity)
         : [...this.filters.amenities, amenity],
     });
+  }
+  resetPropertySection(): void {
+    this.patch({
+      maxBudget: this.filters.mode === 'buy' ? 4000000 : 12000,
+      propertyType: 'Tous',
+      minBedrooms: 0,
+      minBathrooms: 0,
+      minArea: 0,
+      maxArea: 500,
+      sortBy: 'relevance',
+    });
+  }
+  resetListingSection(): void {
+    this.patch({
+      includeKeywords: '',
+      excludeKeywords: '',
+      publishedWithinDays: 0,
+      minFloor: 0,
+      maxFloor: 0,
+    });
+  }
+  resetEnergySection(): void {
+    this.patch({ energyRatings: [], newOnly: false });
+  }
+  resetAmenitiesSection(): void {
+    this.patch({ amenities: [] });
   }
 }
