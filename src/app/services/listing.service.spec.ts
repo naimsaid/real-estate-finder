@@ -28,6 +28,9 @@ describe('ListingService', () => {
       isNew: true,
       updatedMinutesAgo: 2,
       score: 90,
+      publishedAt: new Date(Date.now() - 12 * 60 * 60 * 1000).toISOString(),
+      floor: 2,
+      energyRating: 'B',
     },
     {
       id: 2,
@@ -50,6 +53,9 @@ describe('ListingService', () => {
       isNew: false,
       updatedMinutesAgo: 8,
       score: 80,
+      publishedAt: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+      floor: 0,
+      energyRating: 'E',
     },
     {
       id: 3,
@@ -72,6 +78,9 @@ describe('ListingService', () => {
       isNew: true,
       updatedMinutesAgo: 1,
       score: 95,
+      publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+      floor: 5,
+      energyRating: 'C',
     },
   ];
   const repository: ListingRepository = {
@@ -113,6 +122,12 @@ describe('ListingService', () => {
       newOnly: false,
       sortBy: 'priceDesc',
       query: '',
+      includeKeywords: '',
+      excludeKeywords: '',
+      publishedWithinDays: 0,
+      minFloor: 0,
+      maxFloor: 0,
+      energyRatings: [],
     });
     const results = service.search(filters);
 
@@ -139,6 +154,12 @@ describe('ListingService', () => {
       newOnly: false,
       sortBy: 'priceDesc',
       query: '',
+      includeKeywords: '',
+      excludeKeywords: '',
+      publishedWithinDays: 0,
+      minFloor: 0,
+      maxFloor: 0,
+      energyRatings: [],
     });
 
     expect(result.map((listing) => listing.id)).toEqual([2, 1]);
@@ -160,6 +181,12 @@ describe('ListingService', () => {
       newOnly: true,
       sortBy: 'relevance',
       query: '',
+      includeKeywords: '',
+      excludeKeywords: '',
+      publishedWithinDays: 0,
+      minFloor: 0,
+      maxFloor: 0,
+      energyRatings: [],
     });
 
     expect(result.map((listing) => listing.id)).toEqual([1]);
@@ -191,6 +218,12 @@ describe('ListingService', () => {
       newOnly: false,
       sortBy: 'relevance',
       query: '',
+      includeKeywords: '',
+      excludeKeywords: '',
+      publishedWithinDays: 0,
+      minFloor: 0,
+      maxFloor: 0,
+      energyRatings: [],
       ...(update as Partial<Filter>),
     });
 
@@ -211,6 +244,12 @@ describe('ListingService', () => {
       amenities: [],
       newOnly: false,
       sortBy: 'relevance' as const,
+      includeKeywords: '',
+      excludeKeywords: '',
+      publishedWithinDays: 0,
+      minFloor: 0,
+      maxFloor: 0,
+      energyRatings: [],
     };
 
     expect(service.filter(listings, { ...baseFilters, query: '' }).map(({ id }) => id)).toEqual([
@@ -246,9 +285,41 @@ describe('ListingService', () => {
       newOnly: false,
       sortBy: 'relevance',
       query: 'test',
+      includeKeywords: '',
+      excludeKeywords: '',
+      publishedWithinDays: 0,
+      minFloor: 0,
+      maxFloor: 0,
+      energyRatings: [],
     });
 
     expect(result).toHaveLength(6667);
     expect(performance.now() - startedAt).toBeLessThan(1000);
+  });
+
+  it('combines inclusive and exclusive keywords, publication date, floor and DPE', () => {
+    const result = service.filter(listings, {
+      mode: 'buy',
+      city: 'Toutes les villes',
+      propertyType: 'Tous',
+      maxBudget: 3000000,
+      minRooms: 1,
+      minBedrooms: 0,
+      minBathrooms: 0,
+      minArea: 0,
+      maxArea: 500,
+      amenities: [],
+      newOnly: false,
+      sortBy: 'relevance',
+      query: '',
+      includeKeywords: 'appartement, balcon',
+      excludeKeywords: 'travaux',
+      publishedWithinDays: 3,
+      minFloor: 1,
+      maxFloor: 4,
+      energyRatings: ['A', 'B'],
+    });
+
+    expect(result.map(({ id }) => id)).toEqual([1]);
   });
 });

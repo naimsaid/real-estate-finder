@@ -1,6 +1,7 @@
 import { ListingMode, PropertyType } from './listing';
 
 export type SortOption = 'relevance' | 'priceAsc' | 'priceDesc';
+export type EnergyRating = 'A' | 'B' | 'C' | 'D' | 'E' | 'F' | 'G';
 
 export interface Filter {
   mode: ListingMode;
@@ -16,6 +17,12 @@ export interface Filter {
   newOnly: boolean;
   sortBy: SortOption;
   query: string;
+  includeKeywords: string;
+  excludeKeywords: string;
+  publishedWithinDays: number;
+  minFloor: number;
+  maxFloor: number;
+  energyRatings: EnergyRating[];
 }
 
 export interface SelectOption<T> {

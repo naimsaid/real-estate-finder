@@ -28,6 +28,9 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     isNew: true,
     updatedMinutesAgo: 3,
     score: 98,
+    publishedAt: new Date(Date.now() - 6 * 60 * 60 * 1000).toISOString(),
+    floor: 3,
+    energyRating: 'B',
   },
   {
     id: 2,
@@ -56,6 +59,9 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     isNew: false,
     updatedMinutesAgo: 12,
     score: 95,
+    publishedAt: new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString(),
+    floor: 0,
+    energyRating: 'D',
   },
   {
     id: 3,
@@ -84,6 +90,9 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     isNew: true,
     updatedMinutesAgo: 1,
     score: 92,
+    publishedAt: new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString(),
+    floor: 5,
+    energyRating: 'C',
   },
   {
     id: 4,
@@ -112,6 +121,8 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     isNew: false,
     updatedMinutesAgo: 18,
     score: 90,
+    publishedAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+    floor: 0,
   },
   {
     id: 5,
@@ -140,6 +151,9 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     isNew: true,
     updatedMinutesAgo: 6,
     score: 89,
+    publishedAt: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+    floor: 7,
+    energyRating: 'A',
   },
   {
     id: 6,
@@ -168,5 +182,8 @@ export const MOCK_LISTINGS: readonly Listing[] = [
     isNew: false,
     updatedMinutesAgo: 24,
     score: 87,
+    publishedAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
+    floor: 2,
+    energyRating: 'C',
   },
 ];

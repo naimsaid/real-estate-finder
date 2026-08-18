@@ -674,6 +674,15 @@ select:focus {
   display: grid;
   gap: 12px;
   margin-top: 16px;
+
+  input[type='text'] {
+    background: #f8fbff;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--ink);
+    min-height: 48px;
+    padding: 0 14px;
+  }
 }
 
 .toggle-row {
