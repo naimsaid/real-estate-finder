@@ -172,6 +172,26 @@ describe('ListingService', () => {
     expect(listings.map((listing) => listing.id)).toEqual([1, 2, 3]);
   });
 
+  it('filters listings geometrically inside a polygon or circle', () => {
+    const polygon = service.filterByZone(listings, {
+      type: 'polygon',
+      points: [
+        { latitude: 33.9, longitude: -6.95 },
+        { latitude: 34.1, longitude: -6.95 },
+        { latitude: 34.1, longitude: -6.7 },
+        { latitude: 33.9, longitude: -6.7 },
+      ],
+    });
+    const circle = service.filterByZone(listings, {
+      type: 'circle',
+      center: { latitude: 34.0209, longitude: -6.8416 },
+      radiusMeters: 1500,
+    });
+
+    expect(polygon.map(({ id }) => id)).toEqual([1, 3]);
+    expect(circle.map(({ id }) => id)).toEqual([1, 3]);
+  });
+
   it('combines city, type, budget, rooms, surface, amenities, mode and novelty filters', () => {
     const result = service.filter(listings, {
       mode: 'buy',

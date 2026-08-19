@@ -15,13 +15,40 @@
   }
 }
 
-.location-button {
+.map-action-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.location-button,
+.draw-button,
+.shape-button,
+.reset-zone-button {
   background: var(--card);
   border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--accent);
   font-weight: 900;
   padding: 10px 14px;
+}
+
+.draw-button.active {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+.reset-zone-button {
+  color: var(--muted);
+}
+
+.drawing-help {
+  background: var(--accent-soft);
+  border-radius: 7px;
+  color: var(--ink);
+  margin: 0 0 12px;
+  padding: 10px 12px;
 }
 
 .location-message {
@@ -139,6 +166,14 @@
 }
 
 @media (max-width: 760px) {
+  .map-actions {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .map-action-buttons {
+    justify-content: flex-start;
+  }
   .listings-map,
   .map-loading {
     min-height: 500px;
