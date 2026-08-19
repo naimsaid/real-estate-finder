@@ -18,6 +18,7 @@ import {
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Listing } from '../../models/listing';
+import { MapPoint, MapZone } from '../../models/map-zone';
 import { formatPrice, formatSurface } from '../../utils/listing-format';
 
 interface LeafletLayer {
@@ -25,6 +26,10 @@ interface LeafletLayer {
   bindTooltip?(content: string, options?: object): LeafletLayer;
   on?(event: string, callback: () => void): LeafletLayer;
   remove?(): void;
+}
+
+interface LeafletMouseEvent {
+  latlng: { lat: number; lng: number };
 }
 
 interface LeafletBounds {
@@ -47,6 +52,8 @@ interface LeafletApi {
   tileLayer(url: string, options?: object): LeafletLayer;
   marker(position: [number, number], options?: object): LeafletLayer;
   circle(position: [number, number], options?: object): LeafletLayer;
+  polygon(positions: [number, number][], options?: object): LeafletLayer;
+  polyline(positions: [number, number][], options?: object): LeafletLayer;
   divIcon(options: object): object;
 }
 
@@ -66,10 +73,52 @@ declare global {
     <section class="map-results" aria-label="Carte des annonces">
       <div class="map-actions">
         <p>{{ visibleListingCount }} annonces dans cette zone</p>
-        <button type="button" class="location-button" [disabled]="locating" (click)="locateUser()">
-          {{ locating ? 'Localisation…' : 'Autour de moi' }}
-        </button>
+        <div class="map-action-buttons">
+          <button
+            type="button"
+            class="draw-button"
+            [class.active]="drawingMode !== null"
+            [attr.aria-pressed]="drawingMode !== null"
+            (click)="toggleDrawing()"
+          >
+            {{
+              drawingMode === 'polygon' && draftPoints.length >= 3
+                ? 'Terminer la zone'
+                : drawingMode
+                  ? 'Annuler le dessin'
+                  : 'Dessiner ma zone'
+            }}
+          </button>
+          @if (drawingMode === null && !zone) {
+            <button type="button" class="shape-button" (click)="startDrawing('circle')">
+              Dessiner un cercle
+            </button>
+          }
+          @if (zone) {
+            <button type="button" class="reset-zone-button" (click)="resetZone()">
+              Réinitialiser la zone
+            </button>
+          }
+          <button
+            type="button"
+            class="location-button"
+            [disabled]="locating"
+            (click)="locateUser()"
+          >
+            {{ locating ? 'Localisation…' : 'Autour de moi' }}
+          </button>
+        </div>
       </div>
+      @if (drawingMode) {
+        <p class="drawing-help" role="status">
+          @if (drawingMode === 'polygon') {
+            Placez au moins 3 points à la souris ou au tactile, puis choisissez « Terminer la zone
+            ».
+          } @else {
+            Placez le centre puis un point sur le bord du cercle à la souris ou au tactile.
+          }
+        </p>
+      }
       @if (locationMessage) {
         <p class="location-message" role="status">{{ locationMessage }}</p>
       }
@@ -117,16 +166,21 @@ export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy 
   private map?: LeafletMap;
   private markers: LeafletLayer[] = [];
   private userLayers: LeafletLayer[] = [];
+  private drawingLayer?: LeafletLayer;
 
   @ViewChild('mapContainer') private mapContainer?: ElementRef<HTMLElement>;
   @Input({ required: true }) listings: readonly Listing[] = [];
+  @Input() zone: MapZone | null = null;
   @Output() readonly visibleListingsChange = new EventEmitter<readonly Listing[]>();
+  @Output() readonly zoneChange = new EventEmitter<MapZone | null>();
   selectedListing?: Listing;
   visibleListingCount = 0;
   mapLoading = true;
   mapError = '';
   locating = false;
   locationMessage = '';
+  drawingMode: 'polygon' | 'circle' | null = null;
+  draftPoints: MapPoint[] = [];
 
   async ngAfterViewInit(): Promise<void> {
     if (!isPlatformBrowser(this.platformId)) return;
@@ -144,6 +198,8 @@ export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy 
       this.visibleListingCount = this.listings.length;
       this.renderMarkers(leaflet, true);
       this.map.on('moveend', this.handleMapMove);
+      this.map.on('click', this.handleMapClick);
+      this.renderZone(leaflet);
       queueMicrotask(() => this.map?.invalidateSize());
     } catch {
       this.mapLoading = false;
@@ -160,10 +216,12 @@ export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy 
       }
       if (this.map && window.L) this.renderMarkers(window.L, true);
     }
+    if (changes['zone'] && this.map && window.L) this.renderZone(window.L);
   }
 
   ngOnDestroy(): void {
     this.map?.off('moveend', this.handleMapMove);
+    this.map?.off('click', this.handleMapClick);
     this.map?.remove();
   }
 
@@ -204,6 +262,105 @@ export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy 
   clearSelection(): void {
     this.selectedListing = undefined;
     if (window.L) this.renderMarkers(window.L);
+  }
+
+  toggleDrawing(): void {
+    if (this.drawingMode === 'polygon' && this.draftPoints.length >= 3) {
+      this.finishPolygon();
+    } else if (this.drawingMode) {
+      this.cancelDrawing();
+    } else {
+      this.startDrawing('polygon');
+    }
+  }
+
+  startDrawing(mode: 'polygon' | 'circle'): void {
+    this.drawingMode = mode;
+    this.draftPoints = [];
+    this.drawingLayer?.remove?.();
+    this.drawingLayer = undefined;
+    this.changeDetector.markForCheck();
+  }
+
+  resetZone(): void {
+    this.cancelDrawing();
+    this.zoneChange.emit(null);
+  }
+
+  private cancelDrawing(): void {
+    this.drawingMode = null;
+    this.draftPoints = [];
+    this.drawingLayer?.remove?.();
+    this.drawingLayer = undefined;
+    if (this.map && window.L) this.renderZone(window.L);
+    this.changeDetector.markForCheck();
+  }
+
+  private readonly handleMapClick = (event?: LeafletMouseEvent): void => {
+    if (!this.drawingMode || !event || !window.L) return;
+    const point = { latitude: event.latlng.lat, longitude: event.latlng.lng };
+    this.draftPoints = [...this.draftPoints, point];
+    if (this.drawingMode === 'circle' && this.draftPoints.length === 2) {
+      const [center, edge] = this.draftPoints;
+      this.zoneChange.emit({
+        type: 'circle',
+        center,
+        radiusMeters: this.distanceInMeters(center, edge),
+      });
+      this.cancelDrawing();
+      return;
+    }
+    this.renderDraft(window.L);
+    this.changeDetector.markForCheck();
+  };
+
+  private finishPolygon(): void {
+    this.zoneChange.emit({ type: 'polygon', points: [...this.draftPoints] });
+    this.cancelDrawing();
+  }
+
+  private renderDraft(leaflet: LeafletApi): void {
+    if (!this.map) return;
+    this.drawingLayer?.remove?.();
+    const positions = this.draftPoints.map(
+      ({ latitude, longitude }) => [latitude, longitude] as [number, number],
+    );
+    this.drawingLayer = leaflet
+      .polyline(positions, { color: '#285ee8', dashArray: '7 7', weight: 3 })
+      .addTo(this.map);
+  }
+
+  private renderZone(leaflet: LeafletApi): void {
+    if (!this.map || this.drawingMode) return;
+    this.drawingLayer?.remove?.();
+    this.drawingLayer = undefined;
+    if (!this.zone) return;
+    const style = { color: '#285ee8', fillColor: '#285ee8', fillOpacity: 0.16, weight: 3 };
+    this.drawingLayer =
+      this.zone.type === 'circle'
+        ? leaflet.circle([this.zone.center.latitude, this.zone.center.longitude], {
+            ...style,
+            radius: this.zone.radiusMeters,
+          })
+        : leaflet.polygon(
+            this.zone.points.map(
+              ({ latitude, longitude }) => [latitude, longitude] as [number, number],
+            ),
+            style,
+          );
+    this.drawingLayer.addTo(this.map);
+  }
+
+  private distanceInMeters(first: MapPoint, second: MapPoint): number {
+    const radians = (degrees: number): number => (degrees * Math.PI) / 180;
+    const latitudeDelta = radians(second.latitude - first.latitude);
+    const longitudeDelta = radians(second.longitude - first.longitude);
+    const latitude1 = radians(first.latitude);
+    const latitude2 = radians(second.latitude);
+    const haversine =
+      Math.sin(latitudeDelta / 2) ** 2 +
+      Math.cos(latitude1) * Math.cos(latitude2) * Math.sin(longitudeDelta / 2) ** 2;
+    return 6_371_000 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
   }
 
   private readonly handleMapMove = (): void => {

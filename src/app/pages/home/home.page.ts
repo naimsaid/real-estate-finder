@@ -29,6 +29,7 @@ import {
   SortOption,
 } from '../../models/filter';
 import { Listing, ListingMode, PROPERTY_TYPES, PropertyType } from '../../models/listing';
+import { MapZone } from '../../models/map-zone';
 import { AdviceService } from '../../services/advice.service';
 import { FavoriteService } from '../../services/favorite.service';
 import { ListingService } from '../../services/listing.service';
@@ -204,6 +205,8 @@ const DEFAULT_FILTERS: Filter = {
           } @else {
             <app-listing-map
               [listings]="sortedListings()"
+              [zone]="mapZone()"
+              (zoneChange)="updateMapZone($event)"
               (visibleListingsChange)="updateVisibleMapListings($event)"
             />
           }
@@ -374,13 +377,16 @@ export class HomePage {
   readonly currentPage = signal(1);
   readonly viewMode = signal<'list' | 'map'>('list');
   readonly visibleMapListings = signal<readonly Listing[] | null>(null);
+  readonly mapZone = signal<MapZone | null>(null);
   readonly comparisonIds = signal<number[]>([]);
   readonly filtersOpen = signal(false);
   readonly isMobile = signal(false);
   readonly activeFilterCount = computed(() => this.countActiveFilters(this.filters()));
   readonly activeFilterSummary = computed(() => this.summarizeActiveFilters(this.filters()));
   readonly filteredListings = this.listings.search(this.filters);
-  readonly sortedListings = this.filteredListings;
+  readonly sortedListings = computed(() =>
+    this.listings.filterByZone(this.filteredListings(), this.mapZone()),
+  );
   readonly listedListings = computed(() => {
     const visibleListings = this.visibleMapListings();
     if (!visibleListings) return this.sortedListings();
@@ -481,6 +487,11 @@ export class HomePage {
   }
   updateVisibleMapListings(listings: readonly Listing[]): void {
     this.visibleMapListings.set(listings);
+    this.currentPage.set(1);
+  }
+  updateMapZone(zone: MapZone | null): void {
+    this.mapZone.set(zone);
+    this.visibleMapListings.set(null);
     this.currentPage.set(1);
   }
   changeMode(mode: ListingMode): void {

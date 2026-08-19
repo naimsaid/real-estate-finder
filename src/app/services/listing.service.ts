@@ -1,6 +1,7 @@
 import { computed, inject, Injectable, Signal, signal } from '@angular/core';
 import { Filter } from '../models/filter';
 import { Listing } from '../models/listing';
+import { MapPoint, MapZone } from '../models/map-zone';
 import { LISTING_REPOSITORY } from '../repositories/listing.repository';
 
 export type ListingCriteria = Omit<Filter, 'sortBy'>;
@@ -45,6 +46,48 @@ export class ListingService {
 
   filter(listings: readonly Listing[], filters: Filter): Listing[] {
     return this.sort(this.filterMatches(listings, filters), filters.sortBy);
+  }
+
+  filterByZone(listings: readonly Listing[], zone: MapZone | null): Listing[] {
+    if (!zone) return [...listings];
+    return listings.filter((listing) => this.isPointInZone(listing, zone));
+  }
+
+  private isPointInZone(point: MapPoint, zone: MapZone): boolean {
+    if (zone.type === 'circle') {
+      return this.distanceInMeters(point, zone.center) <= zone.radiusMeters;
+    }
+
+    let inside = false;
+    for (
+      let index = 0, previous = zone.points.length - 1;
+      index < zone.points.length;
+      previous = index++
+    ) {
+      const currentPoint = zone.points[index];
+      const previousPoint = zone.points[previous];
+      const crossesLatitude =
+        currentPoint.latitude > point.latitude !== previousPoint.latitude > point.latitude;
+      const crossingLongitude =
+        ((previousPoint.longitude - currentPoint.longitude) *
+          (point.latitude - currentPoint.latitude)) /
+          (previousPoint.latitude - currentPoint.latitude) +
+        currentPoint.longitude;
+      if (crossesLatitude && point.longitude < crossingLongitude) inside = !inside;
+    }
+    return inside;
+  }
+
+  private distanceInMeters(first: MapPoint, second: MapPoint): number {
+    const radians = (degrees: number): number => (degrees * Math.PI) / 180;
+    const latitudeDelta = radians(second.latitude - first.latitude);
+    const longitudeDelta = radians(second.longitude - first.longitude);
+    const latitude1 = radians(first.latitude);
+    const latitude2 = radians(second.latitude);
+    const haversine =
+      Math.sin(latitudeDelta / 2) ** 2 +
+      Math.cos(latitude1) * Math.cos(latitude2) * Math.sin(longitudeDelta / 2) ** 2;
+    return 6_371_000 * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
   }
 
   filterMatches(listings: readonly Listing[], filters: ListingCriteria): Listing[] {

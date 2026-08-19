@@ -84,6 +84,26 @@ describe('HomePage', () => {
     expect(page.filteredListings().map(({ id }) => id)).toEqual([3, 6]);
   });
 
+  it('combines the drawn zone with classic filters and applies it to the grid', () => {
+    const fixture = TestBed.createComponent(HomePage);
+    const page = fixture.componentInstance;
+    page.updateFilters({ city: 'Casablanca', maxBudget: 2500000 });
+    page.updateMapZone({
+      type: 'circle',
+      center: { latitude: 33.5921, longitude: -7.6642 },
+      radiusMeters: 1000,
+    });
+    fixture.detectChanges();
+
+    expect(page.sortedListings().map(({ id }) => id)).toEqual([2]);
+    const grid = fixture.debugElement.query(By.directive(ListingGridComponent))
+      .componentInstance as ListingGridComponent;
+    expect(grid.listings.map(({ id }) => id)).toEqual([2]);
+
+    page.updateMapZone(null);
+    expect(page.mapZone()).toBeNull();
+  });
+
   it('resets only advanced filters', () => {
     const page = TestBed.createComponent(HomePage).componentInstance;
     page.updateFilters({
