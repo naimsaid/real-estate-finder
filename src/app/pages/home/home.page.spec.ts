@@ -1,6 +1,11 @@
+import { PLATFORM_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { By } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { appConfig } from '../../app.config';
+import { FiltersPanelComponent } from '../../components/filters-panel/filters-panel.component';
+import { ListingGridComponent } from '../../components/listing-grid/listing-grid.component';
+import { ListingMapComponent } from '../../components/listing-map/listing-map.component';
 import { MOCK_LISTINGS } from '../../data/mock-listings';
 import { LISTING_REPOSITORY } from '../../repositories/listing.repository';
 import { ListingService } from '../../services/listing.service';
@@ -38,6 +43,35 @@ describe('HomePage', () => {
     page.updateFilters({ query: 'aucun resultat' });
 
     expect(page.filteredListings()).toEqual([]);
+  });
+
+  it('synchronizes a filter change with the map and list views immediately', () => {
+    TestBed.overrideProvider(PLATFORM_ID, { useValue: 'server' });
+    const fixture = TestBed.createComponent(HomePage);
+    const page = fixture.componentInstance;
+    page.viewMode.set('map');
+    page.updateVisibleMapListings([MOCK_LISTINGS[0]]);
+    fixture.detectChanges();
+
+    const filtersPanel = fixture.debugElement.query(By.directive(FiltersPanelComponent))
+      .componentInstance as FiltersPanelComponent;
+    filtersPanel.filtersChange.emit({ city: 'Rabat' });
+    fixture.detectChanges();
+
+    const expectedIds = page.filteredListings().map(({ id }) => id);
+    const map = fixture.debugElement.query(By.directive(ListingMapComponent))
+      .componentInstance as ListingMapComponent;
+    expect(page.visibleMapListings()).toBeNull();
+    expect(map.listings.map(({ id }) => id)).toEqual(expectedIds);
+    expect(map.visibleListingCount).toBe(expectedIds.length);
+
+    page.viewMode.set('list');
+    fixture.detectChanges();
+
+    const grid = fixture.debugElement.query(By.directive(ListingGridComponent))
+      .componentInstance as ListingGridComponent;
+    expect(grid.listings.map(({ id }) => id)).toEqual(expectedIds);
+    expect(grid.totalListings).toBe(expectedIds.length);
   });
 
   it('changes mode with the appropriate budget and exposes rental results', () => {
