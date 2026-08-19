@@ -1,3 +1,18 @@
+:root {
+  --accent: #3f7cff;
+  --accent-strong: #285ee8;
+  --accent-soft: #eef4ff;
+  --accent-soft-strong: #e8f0ff;
+  --coral: #f0657a;
+  --ink: #172033;
+  --muted: #667085;
+  --line: #dfe8f5;
+  --soft: #f7f9fc;
+  --card: #ffffff;
+  --danger: #b42318;
+  --success: #18794e;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -17,7 +32,8 @@ body {
     BlinkMacSystemFont,
     'Segoe UI',
     sans-serif;
-  background: #f6f8f4;
+  color: var(--ink);
+  background: var(--soft);
 }
 
 img {

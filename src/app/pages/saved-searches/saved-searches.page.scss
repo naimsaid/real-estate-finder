@@ -53,7 +53,7 @@
 .delete-search {
   background: transparent;
   border: 0;
-  color: #b42318;
+  color: var(--danger);
   font-weight: 800;
 }
 .criteria-list {
@@ -98,7 +98,7 @@
     width: 100%;
   }
   input[aria-invalid='true'] {
-    border-color: #b42318;
+    border-color: var(--danger);
     box-shadow: 0 0 0 2px rgba(180, 35, 24, 0.12);
   }
   button {
@@ -110,10 +110,10 @@
     padding: 10px 16px;
   }
   .alert-message--error {
-    color: #b42318;
+    color: var(--danger);
   }
   .alert-message--success {
-    color: #18794e;
+    color: var(--success);
   }
 }
 @media (max-width: 700px) {
