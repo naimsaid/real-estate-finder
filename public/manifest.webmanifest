@@ -1,0 +1,18 @@
+{
+  "name": "Habita - annonces immobilières",
+  "short_name": "Habita",
+  "description": "Trouvez un appartement ou une maison en vente ou en location.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#f6f8f4",
+  "theme_color": "#173c62",
+  "icons": [
+    {
+      "src": "/assets/habita-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
