@@ -153,11 +153,12 @@ export class ListingMapComponent implements AfterViewInit, OnChanges, OnDestroy 
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['listings'] && this.map && window.L) {
+    if (changes['listings']) {
+      this.visibleListingCount = this.listings.length;
       if (this.selectedListing) {
         this.selectedListing = this.listings.find(({ id }) => id === this.selectedListing?.id);
       }
-      this.renderMarkers(window.L, true);
+      if (this.map && window.L) this.renderMarkers(window.L, true);
     }
   }
 
