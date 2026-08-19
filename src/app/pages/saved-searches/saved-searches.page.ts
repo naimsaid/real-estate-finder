@@ -55,7 +55,7 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
                   <a class="ghost-button" routerLink="/" [queryParams]="queryParams(search.filters)"
                     >Voir les annonces</a
                   >
-                  <form class="alert-form" (submit)="saveEmail($event, search)">
+                  <form class="alert-form" novalidate (submit)="saveEmail($event, search)">
                     <label [for]="'alert-email-' + search.id"
                       >Email pour les alertes (optionnel)</label
                     >
@@ -66,14 +66,26 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
                         name="alertEmail"
                         placeholder="vous@exemple.com"
                         [ngModel]="search.alertEmail"
-                        (ngModelChange)="emailDrafts[search.id] = $event"
+                        [attr.aria-invalid]="emailErrors()[search.id] ? 'true' : null"
+                        [attr.aria-describedby]="
+                          emailErrors()[search.id] ? 'alert-email-error-' + search.id : null
+                        "
+                        (ngModelChange)="updateEmailDraft(search.id, $event)"
                       />
                       <button type="submit">
                         {{ search.alertEmail ? 'Modifier' : 'Activer' }}
                       </button>
                     </div>
+                    @if (emailErrors()[search.id]; as error) {
+                      <small
+                        class="alert-message alert-message--error"
+                        [id]="'alert-email-error-' + search.id"
+                        role="alert"
+                        >{{ error }}</small
+                      >
+                    }
                     @if (confirmedId() === search.id) {
-                      <small role="status"
+                      <small class="alert-message alert-message--success" role="status"
                         >Adresse enregistrée. Aucun email ne sera envoyé depuis cette démo.</small
                       >
                     }
@@ -90,7 +102,10 @@ import { formatPrice, formatSurface } from '../../utils/listing-format';
 export class SavedSearchesPage {
   readonly searches = inject(SavedSearchService);
   readonly confirmedId = signal('');
+  readonly emailErrors = signal<Record<string, string>>({});
   readonly emailDrafts: Record<string, string> = {};
+
+  private readonly emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   title(filters: Filter): string {
     return `${filters.propertyType === 'Tous' ? 'Tous les biens' : filters.propertyType} · ${filters.city}`;
@@ -133,7 +148,39 @@ export class SavedSearchesPage {
 
   saveEmail(event: Event, search: SavedSearch): void {
     event.preventDefault();
-    this.searches.setAlertEmail(search.id, this.emailDrafts[search.id] ?? search.alertEmail);
+    const email = (this.emailDrafts[search.id] ?? search.alertEmail).trim();
+
+    if (!this.emailPattern.test(email)) {
+      this.setEmailError(
+        search.id,
+        email ? 'Saisissez une adresse email valide.' : 'Saisissez une adresse email.',
+      );
+      return;
+    }
+
+    if (email.toLowerCase() === search.alertEmail.trim().toLowerCase()) {
+      this.setEmailError(search.id, 'Une alerte est déjà activée avec cette adresse email.');
+      return;
+    }
+
+    this.clearEmailError(search.id);
+    this.searches.setAlertEmail(search.id, email);
+    this.emailDrafts[search.id] = email;
     this.confirmedId.set(search.id);
+  }
+
+  updateEmailDraft(searchId: string, email: string): void {
+    this.emailDrafts[searchId] = email;
+    this.clearEmailError(searchId);
+    if (this.confirmedId() === searchId) this.confirmedId.set('');
+  }
+
+  private setEmailError(searchId: string, message: string): void {
+    this.confirmedId.set('');
+    this.emailErrors.update((errors) => ({ ...errors, [searchId]: message }));
+  }
+
+  private clearEmailError(searchId: string): void {
+    this.emailErrors.update(({ [searchId]: _removed, ...errors }) => errors);
   }
 }
