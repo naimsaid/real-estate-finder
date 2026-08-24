@@ -39,4 +39,12 @@ describe('PublishPage', () => {
       'Votre annonce a bien été envoyée',
     );
   });
+
+  it('only accepts property types defined by the listing model', () => {
+    const fixture = TestBed.createComponent(PublishPage);
+
+    fixture.componentInstance.form.controls.type.setValue('Terrain' as never);
+
+    expect(fixture.componentInstance.form.controls.type.hasError('propertyType')).toBe(true);
+  });
 });
