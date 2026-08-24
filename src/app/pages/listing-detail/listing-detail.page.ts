@@ -284,7 +284,7 @@ export class ListingDetailPage implements OnDestroy {
       offers: {
         '@type': 'Offer',
         price: listing.price,
-        priceCurrency: listing.city === 'Paris' ? 'EUR' : 'MAD',
+        priceCurrency: 'MAD',
         availability: 'https://schema.org/InStock',
       },
       address: {
