@@ -1,0 +1,123 @@
+.neighborhoods-section {
+  margin: 0 auto;
+  max-width: 1440px;
+  padding: 72px clamp(18px, 4vw, 64px) 84px;
+  scroll-margin-top: 84px;
+}
+
+.neighborhoods-heading {
+  align-items: end;
+  display: flex;
+  gap: 24px;
+  justify-content: space-between;
+  margin-bottom: 28px;
+
+  h2 {
+    font-size: clamp(1.9rem, 3vw, 2.7rem);
+    letter-spacing: -0.04em;
+    margin-bottom: 12px;
+  }
+
+  p:not(.eyebrow) {
+    color: var(--muted);
+    line-height: 1.65;
+    margin-bottom: 0;
+    max-width: 680px;
+  }
+
+  > a {
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--accent);
+    flex: 0 0 auto;
+    font-weight: 900;
+    padding: 12px 18px;
+    text-decoration: none;
+  }
+}
+
+.neighborhoods-grid {
+  display: grid;
+  gap: 20px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.neighborhood-card {
+  border-radius: 10px;
+  box-shadow: 0 16px 38px rgba(23, 32, 51, 0.12);
+  min-height: 280px;
+  overflow: hidden;
+  position: relative;
+
+  &::after {
+    background: linear-gradient(180deg, transparent 28%, rgba(10, 20, 36, 0.9));
+    content: '';
+    inset: 0;
+    position: absolute;
+  }
+
+  img {
+    height: 100%;
+    inset: 0;
+    object-fit: cover;
+    position: absolute;
+    transition: transform 220ms ease;
+    width: 100%;
+  }
+
+  &:hover img {
+    transform: scale(1.04);
+  }
+}
+
+.neighborhood-overlay {
+  bottom: 0;
+  color: #fff;
+  left: 0;
+  padding: 24px;
+  position: absolute;
+  right: 0;
+  z-index: 1;
+
+  p {
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.08em;
+    margin: 0 0 6px;
+    text-transform: uppercase;
+  }
+
+  h3 {
+    font-size: 1.55rem;
+    margin: 0 0 14px;
+  }
+
+  a {
+    color: #fff;
+    font-size: 0.9rem;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  a:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 4px;
+  }
+}
+
+@media (max-width: 900px) {
+  .neighborhoods-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 620px) {
+  .neighborhoods-heading {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .neighborhoods-grid {
+    grid-template-columns: 1fr;
+  }
+}

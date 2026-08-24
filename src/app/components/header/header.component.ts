@@ -12,6 +12,7 @@ import { FavoriteService } from '../../services/favorite.service';
       <div class="nav-links">
         <a routerLink="/" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }"
           >Annonces</a
+        ><a routerLink="/" fragment="quartiers">Quartiers</a
         ><a routerLink="/favoris" routerLinkActive="active"
           >Favoris
           <span class="favorites-count" aria-label="Nombre de favoris">{{

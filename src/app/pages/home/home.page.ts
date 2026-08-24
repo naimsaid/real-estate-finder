@@ -19,6 +19,7 @@ import { FiltersPanelComponent } from '../../components/filters-panel/filters-pa
 import { HeaderComponent } from '../../components/header/header.component';
 import { ListingGridComponent } from '../../components/listing-grid/listing-grid.component';
 import { ListingMapComponent } from '../../components/listing-map/listing-map.component';
+import { NeighborhoodsSectionComponent } from '../../components/neighborhoods-section/neighborhoods-section.component';
 import { SearchPanelComponent } from '../../components/search-panel/search-panel.component';
 import {
   AmenityOption,
@@ -71,6 +72,7 @@ const DEFAULT_FILTERS: Filter = {
     HeaderComponent,
     ListingGridComponent,
     ListingMapComponent,
+    NeighborhoodsSectionComponent,
     SearchPanelComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -303,6 +305,7 @@ const DEFAULT_FILTERS: Filter = {
           </div>
         </section>
       }
+      <app-neighborhoods-section [listings]="neighborhoodListings()" />
       <app-advice-section [advice]="advice" />
     </main>
   `,
@@ -404,6 +407,14 @@ export class HomePage {
   readonly recentlyViewedListings = computed(() =>
     this.resolveListings(this.recentlyViewed.recentlyViewedIds()),
   );
+  readonly neighborhoodListings = computed(() => {
+    const districts = new Set<string>();
+    return this.listings.listings().filter((listing) => {
+      if (districts.has(listing.district)) return false;
+      districts.add(listing.district);
+      return true;
+    });
+  });
 
   constructor() {
     const mobileQuery = isPlatformBrowser(this.platformId)

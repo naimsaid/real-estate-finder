@@ -31,8 +31,9 @@ describe('App', () => {
   it('should sort listings by relevance by default', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
-    const page = fixture.debugElement.query((element) => element.componentInstance instanceof HomePage)
-      .componentInstance as HomePage;
+    const page = fixture.debugElement.query(
+      (element) => element.componentInstance instanceof HomePage,
+    ).componentInstance as HomePage;
 
     expect(page.filters().sortBy).toBe('relevance');
     expect(page.filteredListings().map((listing) => listing.id)).toEqual([1, 2, 5]);
@@ -42,8 +43,9 @@ describe('App', () => {
     const fixture = TestBed.createComponent(App);
     const compiled = fixture.nativeElement as HTMLElement;
     fixture.detectChanges();
-    const page = fixture.debugElement.query((element) => element.componentInstance instanceof HomePage)
-      .componentInstance as HomePage;
+    const page = fixture.debugElement.query(
+      (element) => element.componentInstance instanceof HomePage,
+    ).componentInstance as HomePage;
 
     const ascendingButton = compiled.querySelector<HTMLButtonElement>('[data-sort="priceAsc"]');
     ascendingButton?.click();
@@ -70,5 +72,17 @@ describe('App', () => {
     expect(adviceLink?.textContent?.trim()).toBe('Conseils');
     expect(adviceSection?.querySelectorAll('.advice-card')).toHaveLength(3);
     expect(adviceSection?.textContent).toContain('Des conseils pour avancer en confiance');
+  });
+
+  it('should render the neighborhoods tab and its destination', async () => {
+    const fixture = TestBed.createComponent(App);
+    await fixture.whenStable();
+    const compiled = fixture.nativeElement as HTMLElement;
+    const neighborhoodsLink = compiled.querySelector<HTMLAnchorElement>('a[href="/#quartiers"]');
+    const neighborhoodsSection = compiled.querySelector<HTMLElement>('#quartiers');
+
+    expect(neighborhoodsLink?.textContent?.trim()).toBe('Quartiers');
+    expect(neighborhoodsSection?.querySelectorAll('.neighborhood-card')).toHaveLength(6);
+    expect(neighborhoodsSection?.textContent).toContain('Trouvez le quartier qui vous ressemble');
   });
 });
