@@ -1,0 +1,11 @@
+#!/bin/sh
+
+commit_message_file="$1"
+header=$(sed -n '1p' "$commit_message_file")
+
+if ! printf '%s\n' "$header" | grep -Eq '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([A-Za-z0-9][A-Za-z0-9._/-]*\))?(!)?: .+'; then
+  printf '%s\n' 'Invalid commit message.' >&2
+  printf '%s\n' 'Expected: <type>(<optional-scope>)!: <description>' >&2
+  printf '%s\n' 'Allowed types: feat, fix, docs, style, refactor, perf, test, build, ci, chore, revert.' >&2
+  exit 1
+fi
