@@ -13,6 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "staged:check": "lint-staged",
+    "prepare": "husky",
     "check": "npm run format:check && npm run lint && npm run test:ci && npm run build"
   },
   "private": true,
