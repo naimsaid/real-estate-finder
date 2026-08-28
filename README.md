@@ -54,6 +54,18 @@ ng e2e
 
 Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
 
+## Running SonarQube analysis locally
+
+Start a SonarQube instance on `http://localhost:9000` and create the project with the key `real-estate-finder-api`. Then provide a project analysis token and run the Maven scanner from the backend directory:
+
+```bash
+cd real-estate-finder-api
+export SONAR_TOKEN=<project-analysis-token>
+mvn sonar:sonar
+```
+
+The SonarQube URL and project key are configured in `real-estate-finder-api/pom.xml`. They can be overridden for another instance with Maven properties, for example `-Dsonar.host.url=https://sonarqube.example.com`.
+
 ## Additional Resources
 
 For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
