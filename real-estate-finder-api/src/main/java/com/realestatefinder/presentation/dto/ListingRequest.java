@@ -3,31 +3,36 @@ package com.realestatefinder.presentation.dto;
 import com.realestatefinder.domain.Amenity;
 import com.realestatefinder.domain.ListingMode;
 import com.realestatefinder.domain.PropertyType;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
+import jakarta.validation.constraints.PositiveOrZero;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 
 /** Data required to create a listing. */
 public record ListingRequest(
-        String title,
-        String description,
-        ListingMode mode,
-        BigDecimal price,
-        String currency,
-        PropertyType propertyType,
-        BigDecimal surface,
-        String city,
-        String postalCode,
-        String district,
-        int rooms,
-        int bedrooms,
-        int bathrooms,
-        Set<Amenity> amenities,
-        List<String> imageUrls) {
+        @NotBlank String title,
+        @NotBlank String description,
+        @NotNull ListingMode mode,
+        @NotNull @PositiveOrZero BigDecimal price,
+        @NotBlank @Pattern(regexp = "[A-Z]{3}") String currency,
+        @NotNull PropertyType propertyType,
+        @NotNull @Positive BigDecimal surface,
+        @NotBlank String city,
+        @NotBlank String postalCode,
+        @NotBlank String district,
+        @Min(1) int rooms,
+        @Min(0) int bedrooms,
+        @Min(0) int bathrooms,
+        @NotNull Set<Amenity> amenities,
+        @NotNull List<@NotBlank String> imageUrls) {
 
     public ListingRequest {
-        amenities = Set.copyOf(Objects.requireNonNull(amenities, "amenities must not be null"));
-        imageUrls = List.copyOf(Objects.requireNonNull(imageUrls, "imageUrls must not be null"));
+        amenities = amenities == null ? null : Set.copyOf(amenities);
+        imageUrls = imageUrls == null ? null : List.copyOf(imageUrls);
     }
 }
