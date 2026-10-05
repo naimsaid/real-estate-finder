@@ -62,7 +62,7 @@ describe('App', () => {
     const adviceSection = compiled.querySelector<HTMLElement>('#conseils');
 
     expect(adviceLink?.textContent?.trim()).toBe('Conseils');
-    expect(adviceSection?.querySelectorAll('.advice-card')).toHaveLength(3);
+    expect(adviceSection?.querySelectorAll('.advice-card').length).toBe(3);
     expect(adviceSection?.textContent).toContain('Des conseils pour avancer en confiance');
   });
 });
