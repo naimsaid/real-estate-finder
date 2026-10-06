@@ -16,7 +16,7 @@ describe('HomePage', () => {
     localStorage.clear();
     TestBed.configureTestingModule({
       imports: [HomePage],
-      providers: appConfig.providers,
+      providers: appConfig.providers?.filter((_, index) => index !== 1),
     });
   });
 
@@ -174,7 +174,7 @@ describe('HomePage', () => {
     const router = TestBed.inject(Router);
     const page = TestBed.createComponent(HomePage).componentInstance;
 
-    page.updateFilters({
+    await page.updateFilters({
       includeKeywords: 'terrasse, calme',
       excludeKeywords: 'travaux',
       publishedWithinDays: 7,
@@ -182,9 +182,8 @@ describe('HomePage', () => {
       maxFloor: 8,
       energyRatings: ['A', 'B'],
     });
-    await router.navigateByUrl(router.url);
 
-    expect(router.url).toContain('include=terrasse%2C%20calme');
+    expect(router.parseUrl(router.url).queryParamMap.get('include')).toBe('terrasse, calme');
     expect(router.url).toContain('exclude=travaux');
     expect(router.url).toContain('publishedWithinDays=7');
     expect(router.url).toContain('minFloor=2');
@@ -221,8 +220,7 @@ describe('HomePage', () => {
     const router = TestBed.inject(Router);
     const page = TestBed.createComponent(HomePage).componentInstance;
 
-    page.updateFilters({ city: 'Anfa' });
-    await router.navigateByUrl(router.url);
+    await page.updateFilters({ city: 'Anfa' });
 
     expect(page.filteredListings().map(({ id }) => id)).toEqual([1]);
     expect(router.url).toContain('city=Anfa');

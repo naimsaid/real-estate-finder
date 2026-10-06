@@ -52,7 +52,7 @@ export class SavedSearchService {
     }
   }
 
-  private readonly isValid = (value: unknown): value is SavedSearch => {
+  private isValid(value: unknown): value is SavedSearch {
     if (!value || typeof value !== 'object') return false;
     const search = value as Partial<SavedSearch>;
     return (
@@ -62,7 +62,7 @@ export class SavedSearchService {
       !!search.filters &&
       typeof search.filters === 'object'
     );
-  };
+  }
 
   private sameFilters(first: Filter, second: Filter): boolean {
     return JSON.stringify(first) === JSON.stringify(second);

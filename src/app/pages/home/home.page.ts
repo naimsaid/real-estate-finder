@@ -481,13 +481,13 @@ export class HomePage {
     );
   }
 
-  updateFilters(update: Partial<Filter>): void {
+  updateFilters(update: Partial<Filter>): Promise<boolean> {
     this.filters.update((filters) => ({ ...filters, ...update }));
     // Map visibility is derived from the previous filtered result set. Clear it
     // synchronously so both views consume the new filter result immediately.
     this.visibleMapListings.set(null);
     this.currentPage.set(1);
-    void this.router.navigate([], {
+    return this.router.navigate([], {
       relativeTo: this.route,
       queryParams: this.paramsFromFilters(this.filters()),
       replaceUrl: true,

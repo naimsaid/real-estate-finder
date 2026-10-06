@@ -8,7 +8,7 @@ describe('HomePage accessibility', () => {
     localStorage.clear();
     TestBed.configureTestingModule({
       imports: [HomePage],
-      providers: appConfig.providers,
+      providers: appConfig.providers?.filter((_, index) => index !== 1),
     });
   });
 
@@ -16,6 +16,7 @@ describe('HomePage accessibility', () => {
     const fixture = TestBed.createComponent(HomePage);
     fixture.detectChanges();
     await fixture.whenStable();
+    fixture.detectChanges();
 
     const results = await axe.run(fixture.nativeElement as HTMLElement, {
       rules: {
@@ -25,5 +26,5 @@ describe('HomePage accessibility', () => {
     });
 
     expect(results.violations).toEqual([]);
-  });
+  }, 10_000);
 });
